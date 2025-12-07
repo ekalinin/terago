@@ -16,6 +16,9 @@ func TestReadMeta(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
+	// Get default meta once
+	defaultMeta := core.DefaultMeta()
+
 	// Test with empty file path - should return defaults
 	meta, err := ReadMeta("")
 	if err != nil {
@@ -23,20 +26,20 @@ func TestReadMeta(t *testing.T) {
 	}
 
 	// Check that we got the default values
-	if meta.Title != core.DefaultMeta.Title {
-		t.Errorf("Expected title %s, got %s", core.DefaultMeta.Title, meta.Title)
+	if meta.Title != defaultMeta.Title {
+		t.Errorf("Expected title %s, got %s", defaultMeta.Title, meta.Title)
 	}
 
-	if meta.Description != core.DefaultMeta.Description {
-		t.Errorf("Expected description %s, got %s", core.DefaultMeta.Description, meta.Description)
+	if meta.Description != defaultMeta.Description {
+		t.Errorf("Expected description %s, got %s", defaultMeta.Description, meta.Description)
 	}
 
-	if len(meta.Quadrants) != len(core.DefaultMeta.Quadrants) {
-		t.Errorf("Expected %d quadrants, got %d", len(core.DefaultMeta.Quadrants), len(meta.Quadrants))
+	if len(meta.Quadrants) != len(defaultMeta.Quadrants) {
+		t.Errorf("Expected %d quadrants, got %d", len(defaultMeta.Quadrants), len(meta.Quadrants))
 	}
 
-	if len(meta.Rings) != len(core.DefaultMeta.Rings) {
-		t.Errorf("Expected %d rings, got %d", len(core.DefaultMeta.Rings), len(meta.Rings))
+	if len(meta.Rings) != len(defaultMeta.Rings) {
+		t.Errorf("Expected %d rings, got %d", len(defaultMeta.Rings), len(meta.Rings))
 	}
 
 	// Test with non-existent file - should return defaults
@@ -46,8 +49,8 @@ func TestReadMeta(t *testing.T) {
 	}
 
 	// Check that we got the default values
-	if meta.Title != core.DefaultMeta.Title {
-		t.Errorf("Expected title %s, got %s", core.DefaultMeta.Title, meta.Title)
+	if meta.Title != defaultMeta.Title {
+		t.Errorf("Expected title %s, got %s", defaultMeta.Title, meta.Title)
 	}
 
 	// Test with invalid YAML file - should return defaults
@@ -71,7 +74,7 @@ invalid: yaml: content:
 	}
 
 	// Should still return defaults
-	if meta.Title != core.DefaultMeta.Title {
-		t.Errorf("Expected title %s, got %s", core.DefaultMeta.Title, meta.Title)
+	if meta.Title != defaultMeta.Title {
+		t.Errorf("Expected title %s, got %s", defaultMeta.Title, meta.Title)
 	}
 }

@@ -28,7 +28,7 @@ func main() {
 	if *inputDir == "" {
 		log.Fatalln("Error: Directory path is required (--input)")
 	}
-	files, err := usecases.ReadTechnologiesFiles(*inputDir)
+	files, err := usecases.ReadTechnologiesFiles(*inputDir, meta)
 	if err != nil {
 		log.Fatalf("Failed to read input directory: %v", err)
 	}

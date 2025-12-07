@@ -13,7 +13,7 @@ import (
 )
 
 // ReadTechnologiesFiles reads all Technologies files in the specified directory.
-func ReadTechnologiesFiles(inputDir string) ([]core.TechnologiesFile, error) {
+func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.TechnologiesFile, error) {
 	var technologiesFiles []core.TechnologiesFile
 
 	// Get all YAML files in the directory
@@ -49,7 +49,7 @@ func ReadTechnologiesFiles(inputDir string) ([]core.TechnologiesFile, error) {
 		dateStr := strings.TrimSuffix(fileName, ".yaml")
 
 		// Parse YAML file
-		technologiesFile, err := readTechnologiesFile(file)
+		technologiesFile, err := readTechnologiesFile(file, meta)
 		if err != nil {
 			return technologiesFiles, fmt.Errorf("error processing file %s: %v", file, err)
 		}
@@ -77,7 +77,7 @@ func ReadTechnologiesFiles(inputDir string) ([]core.TechnologiesFile, error) {
 	return technologiesFiles, nil
 }
 
-func readTechnologiesFile(filePath string) (core.TechnologiesFile, error) {
+func readTechnologiesFile(filePath string, meta core.Meta) (core.TechnologiesFile, error) {
 	var technologiesFile core.TechnologiesFile
 
 	// Read file content
@@ -89,6 +89,11 @@ func readTechnologiesFile(filePath string) (core.TechnologiesFile, error) {
 	// Parse YAML content
 	if err := yaml.Unmarshal(data, &technologiesFile); err != nil {
 		return technologiesFile, fmt.Errorf("error parsing YAML: %v", err)
+	}
+
+	// Validate rings and quadrants
+	if err := technologiesFile.ValidateRingsAndQuadrants(meta); err != nil {
+		return technologiesFile, fmt.Errorf("validation error in file %s: %v", filePath, err)
 	}
 
 	return technologiesFile, nil
