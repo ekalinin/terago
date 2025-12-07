@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 
+	"github.com/ekalinin/terago/pkg/core"
 	"github.com/ekalinin/terago/pkg/usecases"
 )
 
@@ -13,9 +16,17 @@ func main() {
 	outputDir := flag.String("output", "output", "Directory path for HTML output")
 	templatePath := flag.String("template", "./templates/index.html", "path to template file")
 	metaPath := flag.String("meta", "meta.yaml", "path to meta file")
+	showVersion := flag.Bool("version", false, "print version")
 	// debugMode := flag.Bool("debug", false, "enable debug mode")
 
 	flag.Parse()
+
+	// Print version if requested
+	if *showVersion {
+		fmt.Println(core.Version)
+		os.Exit(0)
+	}
+
 	log.Println("Start, input=", *inputDir, ", output=", *outputDir, ", template=", *templatePath, ", meta=", *metaPath)
 
 	// Try to read meta file, use defaults if not available

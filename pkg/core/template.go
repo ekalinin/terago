@@ -20,7 +20,7 @@ type RadarData struct {
 	Title       string
 	Date        string
 	Entries     []RadarEntry
-	EntriesJSON template.JS // Добавляем поле для JSON-представления
+	EntriesJSON template.JS // Adding field for JSON representation
 }
 
 // ToJSON converts the entries to JSON format for use in templates

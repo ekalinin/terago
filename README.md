@@ -34,7 +34,10 @@ $ make build
 ./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml
 ```
 
-The `--meta` parameter is optional. If not specified, default values will be used for quadrants and rings. These default values can be found in the [source code](pkg/core/meta.go#L101-L115). The meta.yml file can partially override these default values.
+The `--meta` parameter is optional. If not specified, default values will be
+used for quadrants and rings. These default values can be found in the
+[source code](pkg/core/meta.go#L101-L115). The meta.yml file can partially
+override these default values.
 
 ### Command Line Parameters
 
@@ -42,6 +45,7 @@ The `--meta` parameter is optional. If not specified, default values will be use
 - `--output` - path to directory for saving HTML files (default: "output")
 - `--template` - path to HTML template (default: "./templates/index.html")
 - `--meta` - path to metadata file (default: "meta.yaml")
+- `--version` - print version and exit
 
 ### Input Data Format
 
