@@ -1,4 +1,4 @@
-# TeraGo - Technology Radar
+# TeraGo - Technology Radar in Go
 
 [![Build Status][build-badge]][build-url] [![Download][download-badge]][download-url]
 
