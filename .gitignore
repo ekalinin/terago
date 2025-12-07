@@ -21,3 +21,6 @@ Thumbs.db
 
 # TODO file
 TODO.md
+
+# Added by goreleaser init:
+dist/

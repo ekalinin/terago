@@ -1,6 +1,7 @@
 # Variables
 BINARY_NAME=terago
 BUILD_DIR=build
+DIST_DIR=dist
 TEST_INPUT_DIR=test/test_input
 TEST_OUTPUT_DIR=test/test_output
 TEMPLATE_PATH=pkg/radar/radar.html
@@ -24,6 +25,7 @@ clean:
 	@echo "Cleaning up..."
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(TEST_OUTPUT_DIR)
+	@rm -rf $(DIST_DIR)
 	@echo "Cleanup completed"
 
 # Run tests
@@ -123,12 +125,31 @@ setup-test:
 demo: setup-test build test
 	@echo "Demo completed"
 
+# Get version from source
+VERSION := $(shell grep -E 'const Version = "([^"]+)"' pkg/core/version.go | cut -d '"' -f 2)
+
+# Create git tag
+tag:
+	@echo "Creating git tag v$(VERSION)"
+	git tag -a "v$(VERSION)" -m "Release version $(VERSION)"
+	git push origin "v$(VERSION)"
+	@echo "Git tag v$(VERSION) created and pushed"
+
+# Goreleaser release
+goreleaser:
+	@echo "Creating release with Goreleaser..."
+	goreleaser release --clean
+	@echo "Release created with Goreleaser"
+
+# Goreleaser snapshot
+goreleaser-snapshot:
+	@echo "Creating snapshot with Goreleaser..."
+	goreleaser release --snapshot --clean
+	@echo "Snapshot created with Goreleaser"
+
 # Build release
-release: clean fmt vet test
-	@echo "Building release..."
-	@mkdir -p $(BUILD_DIR)
-	CGO_ENABLED=0 go build -ldflags="-w -s" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/terago
-	@echo "Release built: $(BUILD_DIR)/$(BINARY_NAME)"
+release: clean fmt vet test tag goreleaser
+
 
 # Help
 help:
@@ -145,4 +166,6 @@ help:
 	@echo "  setup-test - Create test data"
 	@echo "  demo       - Full setup and demo run"
 	@echo "  release    - Build release version"
+	@echo "  goreleaser - Create release with Goreleaser"
+	@echo "  goreleaser-snapshot - Create snapshot with Goreleaser"
 	@echo "  help       - Show this help"
