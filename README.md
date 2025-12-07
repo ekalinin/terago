@@ -1,5 +1,7 @@
 # TeraGo - Technology Radar
 
+[![Build Status][build-badge]][build-url] [![Download][download-badge]][download-url]
+
 TeraGo (**Te**chnology **Ra**dar in **Go**) is a tool for creating and visualizing
 technology radars.
 It allows you to track changes in your company's technology stack over time,
@@ -165,3 +167,9 @@ The embedded template can be found in [pkg/radar/radar.html](pkg/radar/radar.htm
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+<!-- Badge links -->
+[build-badge]: https://github.com/ekalinin/terago/actions/workflows/release.yml/badge.svg
+[build-url]: https://github.com/ekalinin/terago/actions/workflows/release.yml
+[download-badge]: https://img.shields.io/github/v/release/ekalinin/terago
+[download-url]: https://github.com/ekalinin/terago/releases/latest
