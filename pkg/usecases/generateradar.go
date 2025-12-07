@@ -42,6 +42,14 @@ func getMovedValue(tech core.Technology) int {
 	return 0 // No movement
 }
 
+// formatDate converts date from YYYYMMDD format to YYYY-MM-DD format
+func formatDate(dateStr string) string {
+	if len(dateStr) != 8 {
+		return dateStr // Return as is if not in expected format
+	}
+	return dateStr[:4] + "-" + dateStr[4:6] + "-" + dateStr[6:8]
+}
+
 // convertTechnologiesToEntries converts Technology structs to RadarEntry structs
 func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta) []core.RadarEntry {
 	var entries []core.RadarEntry
@@ -95,9 +103,10 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		entries := convertTechnologiesToEntries(file.Technologies, meta)
 
 		// Prepare data for template
+		formattedDate := formatDate(file.Date)
 		data := core.RadarData{
 			Title:   meta.Title,
-			Date:    file.Date,
+			Date:    formattedDate,
 			Entries: entries,
 		}
 		data.EntriesJSON = data.ToJSON()

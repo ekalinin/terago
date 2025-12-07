@@ -2,7 +2,7 @@
 BINARY_NAME=terago
 BUILD_DIR=build
 TEST_INPUT_DIR=test/test_input
-TEST_OUTPUT_DIR=test_output
+TEST_OUTPUT_DIR=test/test_output
 TEMPLATE_PATH=template/radar.html
 META_PATH=$(TEST_INPUT_DIR)/test_meta.yaml
 
@@ -61,8 +61,14 @@ vet:
 	go vet ./...
 	@echo "Check completed"
 
+# Run unit tests
+test-unit:
+	@echo "Running unit tests..."
+	go test ./... -v
+	@echo "Unit tests completed"
+
 # Run tests and checks
-check: fmt vet test
+check: fmt vet test-unit test
 	@echo "All checks completed"
 
 # Create test data (if not exists)
@@ -130,6 +136,7 @@ help:
 	@echo "  build      - Build the project"
 	@echo "  clean      - Clean up temporary files"
 	@echo "  test       - Build and run on test data"
+	@echo "  test-unit  - Run unit tests"
 	@echo "  run        - Run on test data (without rebuilding)"
 	@echo "  deps       - Install dependencies"
 	@echo "  fmt        - Format code"
