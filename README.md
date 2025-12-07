@@ -43,7 +43,7 @@ override these default values.
 
 - `--input` - path to directory with technology YAML files (required)
 - `--output` - path to directory for saving HTML files (default: "output")
-- `--template` - path to HTML template (default: "./templates/index.html")
+- `--template` - path to HTML template (if empty, uses default embedded template)
 - `--export-template` - export embedded (default) template to file for customization
 - `--meta` - path to metadata file (default: "meta.yaml")
 - `--version` - print version and exit
@@ -150,9 +150,8 @@ terago/
 │       └── main.go          # Application entry point
 ├── pkg/
 │   ├── core/                # Core data structures
+│   ├── radar/               # Embedded HTML template
 │   └── usecases/            # Business logic
-├── template/
-│   └── radar.html           # HTML template for visualization
 ├── test/
 │   └── test_input/          # Test data
 └── go.mod                   # Project dependencies
@@ -161,6 +160,7 @@ terago/
 ## Visualization
 
 This project uses [Zalando Tech Radar](https://github.com/zalando/tech-radar) for visualization.
+The embedded template can be found in [pkg/radar/radar.html](pkg/radar/radar.html).
 
 ## License
 
