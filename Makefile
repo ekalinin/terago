@@ -147,6 +147,12 @@ goreleaser-snapshot:
 	goreleaser release --snapshot --clean
 	@echo "Snapshot created with Goreleaser"
 
+# Goreleaser check
+goreleaser-check:
+	@echo "Checking Goreleaser configuration..."
+	goreleaser check
+	@echo "Goreleaser configuration is valid"
+
 # Build release
 release: clean fmt vet test tag goreleaser
 
@@ -168,4 +174,5 @@ help:
 	@echo "  release    - Build release version"
 	@echo "  goreleaser - Create release with Goreleaser"
 	@echo "  goreleaser-snapshot - Create snapshot with Goreleaser"
+	@echo "  goreleaser-check - Check Goreleaser configuration"
 	@echo "  help       - Show this help"

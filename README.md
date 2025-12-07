@@ -26,28 +26,6 @@ $ cd terago
 $ make build
 ```
 
-### Release
-
-For creating releases with Goreleaser:
-
-```bash
-# Install Goreleaser
-$ go install github.com/goreleaser/goreleaser@latest
-
-# Create a release (with all checks)
-$ make release
-
-#
-# Or create a snapshot release
-#
-
-# Create a snapshot release
-$ make goreleaser-snapshot
-
-# Create a full release (requires Git tag)
-$ make goreleaser
-```
-
 ## Usage
 
 ### Basic Usage

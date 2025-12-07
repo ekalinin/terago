@@ -1,10 +1,5 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
+# This is the .goreleaser.yml file for TeraGo project.
 # Make sure to check the documentation at https://goreleaser.com
-
-# The lines below are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/need to use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 version: 2
 
@@ -29,7 +24,7 @@ builds:
     binary: terago
 
 archives:
-  - format: tar.gz
+  - formats: [ 'zip' ]
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
@@ -41,7 +36,7 @@ archives:
     # use zip for windows archives
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [ 'zip' ]
 
 changelog:
   sort: asc
