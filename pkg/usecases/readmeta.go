@@ -23,37 +23,12 @@ func ReadMeta(filePath string) (core.Meta, error) {
 		return core.DefaultMeta(), nil
 	}
 
-	// Try to parse YAML
-	var metaFile core.Meta
+	metaFile := core.MetaFile{}
 	if err := yaml.Unmarshal(data, &metaFile); err != nil {
 		log.Printf("Using default meta: failed to parse meta file '%s': %v", filePath, err)
 		return core.DefaultMeta(), nil
 	}
 
-	// Apply defaults for missing fields
-	needsDefaults := false
-	defaultMeta := core.DefaultMeta()
-	if metaFile.Title == "" {
-		metaFile.Title = defaultMeta.Title
-		needsDefaults = true
-	}
-	if metaFile.Description == "" {
-		metaFile.Description = defaultMeta.Description
-		needsDefaults = true
-	}
-	if len(metaFile.Quadrants) == 0 {
-		metaFile.Quadrants = defaultMeta.Quadrants
-		needsDefaults = true
-	}
-	if len(metaFile.Rings) == 0 {
-		metaFile.Rings = defaultMeta.Rings
-		needsDefaults = true
-	}
-
-	// If we applied any defaults, inform the user
-	if needsDefaults {
-		log.Printf("Applied default values for missing fields in meta file '%s'", filePath)
-	}
-
-	return metaFile, nil
+	meta := core.NewMetaFromFile(metaFile)
+	return meta, nil
 }
