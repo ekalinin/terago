@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+</head>
+
+<body>
+    <style>
+        body {
+            font-family: helvetica, arial, 'Source Sans Pro', sans-serif;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://zalando.github.io/tech-radar/release/radar-0.12.js"></script>
+
+    <svg id="radar"></svg>
+
+    <script>
+        // Данные для радара в формате JSON
+        var radarEntries = {{.EntriesJSON }};
+
+        radar_visualization({
+            svg_id: "radar",
+            width: 1450,
+            height: 1050,
+            colors: {
+                background: "#fff",
+                grid: "#dddde0",
+                inactive: "#ddd",
+            },
+            rings: [
+                { name: "ADOPT", color: "#93c47d", id: "adopt" },
+                { name: "TRIAL", color: "#93d2c2", id: "trial" },
+                { name: "ASSESS", color: "#fbdb84", id: "assess" },
+                { name: "HOLD", color: "#efafa9", id: "hold" },
+            ],
+            print_layout: true,
+            quadrants: [
+                { name: "Языки и фреймворки", id: "q1" },
+                { name: "БД и платформы", id: "q2" },
+                { name: "Инфраструктура", id: "q3" },
+                { name: "Архитектура", id: "q4" },
+            ],
+            title: "{{.Title}}",
+            date: "{{.Date}}",
+            links_in_new_tabs: true,
+            entries: radarEntries
+        });
+    </script>
+
+
+    <style>
+        .legend li {
+            margin: 25px 50px 0 0;
+        }
+
+        .legend table {
+            width: 1000px;
+            margin: 0;
+            font-size: 80%;
+        }
+
+        .legend td {
+            width: 50%;
+            vertical-align: top;
+            padding-right: 60px;
+        }
+    </style>
+    <div class="legend">
+        <table>
+            <tr>
+                <td>
+                    <h3>Технологический радар</h3>
+                    <span>Удобный инструмент, помогающий компании управлять
+                        своей платформой разработки и технологической
+                        стратегией. Радар объединяет используемые технологии
+                        в четыре категории: техники, языки и фреймворки,
+                        инструменты и платформы. Каждая из этих областей
+                        ранжируется по стадии внедрения:</span>
+                    <ul>
+                        <li>
+                            <strong>ADOPT</strong> &mdash; технологии, в
+                            которых мы уверены, и рекомендованы к широкому
+                            использованию в компании, соответствуют культуре и
+                            целям компании.
+                        </li>
+                        <li>
+                            <strong>TRIAL</strong> &mdash; новый стек,
+                            используемый лишь в отдельных проектах для
+                            оценки рисков перед массовым внедрением.
+                        </li>
+                        <li>
+                            <strong>ASSESS</strong> &mdash; блидин эдж, ёрли
+                            превью, всякие экспериментальные штуки,
+                            потенциально имеющие ценность.
+                        </li>
+                        <li>
+                            <strong>HOLD</strong> &mdash; депрекейтед
+                            легаси. Отжившие свой век технологии, которые не
+                            рекомендуется использовать для новых проектов,
+                            но допустимо сохранять в старых.
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <h3>Цели</h3>
+                    <ul>
+                        <li>
+                            Держать под контролем свои компетенции.
+                            Подготовка радара — это анализ происходящего —
+                            способ посмотреть в какую сторону движется
+                            индустрия, и как общие тренды соотносятся с
+                            нашим зоопарком.
+                        </li>
+                        <li>
+                            Принимать правильные архитектурные решения. У
+                            команд появляется источник информации о том,
+                            какие решения рекомендуется использовать для тех
+                            или иных целей.
+                        </li>
+                    </ul>
+                    <br /><br />
+                    <h3>Наполнение</h3>
+                    <span>Технический радар поддерживается разработчиками в
+                        формате холивара. В нем отражены наши стремления,
+                        успехи и ошибки.</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</body>
+
+</html>
