@@ -19,6 +19,8 @@ visualizing technologies by categories and adoption status.
 
 To install TeraGo, you need Go 1.20 or higher.
 
+### From Source
+
 ```bash
 # Clone the repository
 $ git clone https://github.com/ekalinin/terago.git
@@ -27,6 +29,15 @@ $ cd terago
 # Build the project
 $ make build
 ```
+
+### From GitHub Releases
+
+You can download the latest pre-built binary from [GitHub Releases][download-url]:
+
+1. Go to the [releases page][download-url]
+2. Download the appropriate version for your operating system
+3. Extract the archive
+4. Run the `terago` binary
 
 ## Usage
 
