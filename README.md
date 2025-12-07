@@ -2,6 +2,23 @@
 
 [![Build Status][build-badge]][build-url] [![Download][download-badge]][download-url]
 
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Installation](#installation)
+  - [From Source](#from-source)
+  - [From GitHub Releases](#from-github-releases)
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Command Line Parameters](#command-line-parameters)
+  - [Customizing the Radar Template](#customizing-the-radar-template)
+  - [Input Data Format](#input-data-format)
+    - [Metadata File (meta.yaml)](#metadata-file-metayaml)
+    - [Technology Files (YYYYMMDD.yaml)](#technology-files-yyyymmddyaml)
+- [Project Structure](#project-structure)
+- [Visualization](#visualization)
+- [License](#license)
+
 TeraGo (**Te**chnology **Ra**dar in **Go**) is a tool for creating and visualizing
 technology radars.
 It allows you to track changes in your company's technology stack over time,
