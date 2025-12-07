@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/ekalinin/terago/pkg/core"
 	"github.com/ekalinin/terago/pkg/usecases"
 )
 
@@ -19,12 +18,11 @@ func main() {
 	flag.Parse()
 	log.Println("Start, input=", *inputDir, ", output=", *outputDir, ", template=", *templatePath, ", meta=", *metaPath)
 
-	meta := core.DefaultMeta
-	if *metaPath != "" {
-		var err error
-		if meta, err = usecases.ReadMeta(*metaPath); err != nil {
-			log.Fatalf("Failed to read meta file: %v", err)
-		}
+	// Try to read meta file, use defaults if not available
+	log.Printf("Reading meta file: %s", *metaPath)
+	meta, err := usecases.ReadMeta(*metaPath)
+	if err != nil {
+		log.Fatalf("Failed to read meta file: %v", err)
 	}
 
 	if *inputDir == "" {
