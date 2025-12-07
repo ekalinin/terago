@@ -4,7 +4,6 @@ bin/
 
 # Test outputs
 test_output/
-test_meta.yaml
 
 # IDE files
 .vscode/
