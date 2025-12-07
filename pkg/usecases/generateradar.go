@@ -9,6 +9,17 @@ import (
 	"github.com/ekalinin/terago/pkg/core"
 )
 
+const (
+	// MovedValueUnchanged indicates no movement
+	MovedValueUnchanged = 0
+	// MovedValueDeprecated indicates movement to outer ring (deprecated)
+	MovedValueDeprecated = -1
+	// MovedValueImproved indicates movement to inner ring (improved)
+	MovedValueImproved = 1
+	// MovedValueNew indicates new technology (not in previous radar)
+	MovedValueNew = 2
+)
+
 // getQuadrantIndex returns the index of the quadrant based on its name
 func getQuadrantIndex(quadrant string, quadrants []core.Quadrant) int {
 	for i, q := range quadrants {
@@ -30,16 +41,24 @@ func getRingIndex(ring string, rings []core.Ring) int {
 }
 
 // getMovedValue determines the moved value based on technology changes
-func getMovedValue(tech core.Technology) int {
+func getMovedValue(tech core.Technology, rings []core.Ring) int {
 	if tech.IsNew {
-		return 0 // New technology
+		return MovedValueNew // New technology
 	}
 	if tech.IsMoved {
 		// Determine direction based on ring movement
-		// This is a simplified logic - you might want to enhance it
-		return 1 // Moved outward
+		currentRingIndex := getRingIndex(tech.Ring, rings)
+		previousRingIndex := getRingIndex(tech.PreviousRing, rings)
+
+		if currentRingIndex < previousRingIndex {
+			return MovedValueImproved // Moved to inner ring (improved)
+		} else if currentRingIndex > previousRingIndex {
+			return MovedValueDeprecated // Moved to outer ring (deprecated)
+		}
+		// If ring indices are equal but IsMoved is true, return deprecated as default
+		return MovedValueDeprecated
 	}
-	return 0 // No movement
+	return MovedValueUnchanged // No movement
 }
 
 // formatDate converts date from YYYYMMDD format to YYYY-MM-DD format
@@ -57,7 +76,7 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 	for _, tech := range technologies {
 		quadrantIndex := getQuadrantIndex(tech.Quadrant, meta.Quadrants)
 		ringIndex := getRingIndex(tech.Ring, meta.Rings)
-		moved := getMovedValue(tech)
+		moved := getMovedValue(tech, meta.Rings)
 
 		// Create link based on technology name and quadrant
 		link := "/" + tech.Quadrant + "/" + tech.Name + "/"
@@ -77,6 +96,7 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 	return entries
 }
 
+// GenerateRadar generates Radar (HTML file).
 func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta) error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {

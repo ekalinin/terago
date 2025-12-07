@@ -7,6 +7,14 @@ import (
 )
 
 func TestGetMovedValue(t *testing.T) {
+	// Define default rings for testing
+	rings := []core.Ring{
+		{Name: "Adopt", Alias: "adopt"},
+		{Name: "Trial", Alias: "trial"},
+		{Name: "Assess", Alias: "assess"},
+		{Name: "Hold", Alias: "hold"},
+	}
+
 	tests := []struct {
 		name     string
 		tech     core.Technology
@@ -18,15 +26,7 @@ func TestGetMovedValue(t *testing.T) {
 				IsNew:   true,
 				IsMoved: false,
 			},
-			expected: 0,
-		},
-		{
-			name: "Moved technology",
-			tech: core.Technology{
-				IsNew:   false,
-				IsMoved: true,
-			},
-			expected: 1,
+			expected: MovedValueNew,
 		},
 		{
 			name: "Unchanged technology",
@@ -34,13 +34,43 @@ func TestGetMovedValue(t *testing.T) {
 				IsNew:   false,
 				IsMoved: false,
 			},
-			expected: 0,
+			expected: MovedValueUnchanged,
+		},
+		{
+			name: "Moved to inner ring (improved)",
+			tech: core.Technology{
+				IsNew:        false,
+				IsMoved:      true,
+				Ring:         "Adopt",
+				PreviousRing: "Trial",
+			},
+			expected: MovedValueImproved,
+		},
+		{
+			name: "Moved to outer ring (deprecated)",
+			tech: core.Technology{
+				IsNew:        false,
+				IsMoved:      true,
+				Ring:         "Hold",
+				PreviousRing: "Adopt",
+			},
+			expected: MovedValueDeprecated,
+		},
+		{
+			name: "Same ring but marked as moved",
+			tech: core.Technology{
+				IsNew:        false,
+				IsMoved:      true,
+				Ring:         "Adopt",
+				PreviousRing: "Adopt",
+			},
+			expected: MovedValueDeprecated,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := getMovedValue(tt.tech)
+			result := getMovedValue(tt.tech, rings)
 			if result != tt.expected {
 				t.Errorf("getMovedValue() = %v, want %v", result, tt.expected)
 			}
