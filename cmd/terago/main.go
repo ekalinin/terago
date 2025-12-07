@@ -14,12 +14,22 @@ func main() {
 	// Parse command-line arguments
 	inputDir := flag.String("input", "", "Directory path containing YAML files")
 	outputDir := flag.String("output", "output", "Directory path for HTML output")
-	templatePath := flag.String("template", "./templates/index.html", "path to template file")
+	templatePath := flag.String("template", "", "path to template file (if empty, uses default template)")
+	exportTemplate := flag.String("export-template", "", "Export embedded (default) template to file (for customization)")
 	metaPath := flag.String("meta", "meta.yaml", "path to meta file")
 	showVersion := flag.Bool("version", false, "print version")
 	// debugMode := flag.Bool("debug", false, "enable debug mode")
 
 	flag.Parse()
+
+	// Export template if requested
+	if *exportTemplate != "" {
+		if err := usecases.ExportEmbeddedTemplate(*exportTemplate); err != nil {
+			log.Fatalf("Failed to export template: %v", err)
+		}
+		log.Printf("Template exported to %s\n", *exportTemplate)
+		os.Exit(0)
+	}
 
 	// Print version if requested
 	if *showVersion {

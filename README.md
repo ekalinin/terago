@@ -44,6 +44,7 @@ override these default values.
 - `--input` - path to directory with technology YAML files (required)
 - `--output` - path to directory for saving HTML files (default: "output")
 - `--template` - path to HTML template (default: "./templates/index.html")
+- `--export-template` - export embedded (default) template to file for customization
 - `--meta` - path to metadata file (default: "meta.yaml")
 - `--version` - print version and exit
 

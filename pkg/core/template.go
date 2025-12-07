@@ -24,7 +24,10 @@ type RadarData struct {
 }
 
 // ToJSON converts the entries to JSON format for use in templates
-func (rd *RadarData) ToJSON() template.JS {
-	jsonBytes, _ := json.Marshal(rd.Entries)
-	return template.JS(jsonBytes)
+func (rd *RadarData) ToJSON() (template.JS, error) {
+	jsonBytes, err := json.Marshal(rd.Entries)
+	if err != nil {
+		return template.JS(""), err
+	}
+	return template.JS(jsonBytes), nil
 }

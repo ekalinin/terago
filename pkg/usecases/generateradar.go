@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ekalinin/terago/pkg/core"
+	"github.com/ekalinin/terago/pkg/radar"
 )
 
 const (
@@ -106,9 +107,17 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 	}
 
 	// read template file
-	templateContent, err := os.ReadFile(templatePath)
-	if err != nil {
-		return err
+	var templateContent []byte
+	var err error
+	if templatePath == "" {
+		// Use embedded template
+		templateContent = []byte(radar.HTML)
+	} else {
+		// Read template file from disk
+		templateContent, err = os.ReadFile(templatePath)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Parse template
@@ -129,7 +138,11 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 			Date:    formattedDate,
 			Entries: entries,
 		}
-		data.EntriesJSON = data.ToJSON()
+		entriesJSON, err := data.ToJSON()
+		if err != nil {
+			return err
+		}
+		data.EntriesJSON = entriesJSON
 
 		// Create output file
 		outputFile := filepath.Join(outputDir, file.Date+".html")

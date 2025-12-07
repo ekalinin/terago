@@ -3,7 +3,7 @@ BINARY_NAME=terago
 BUILD_DIR=build
 TEST_INPUT_DIR=test/test_input
 TEST_OUTPUT_DIR=test/test_output
-TEMPLATE_PATH=template/radar.html
+TEMPLATE_PATH=pkg/radar/radar.html
 META_PATH=$(TEST_INPUT_DIR)/test_meta.yaml
 
 # Main commands
