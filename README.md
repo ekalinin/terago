@@ -1,7 +1,7 @@
 # TeraGo - Technology Radar
 
 TeraGo (**Te**chnology **Ra**dar in **Go**) is a tool for creating and visualizing
-technology radars based on [Zalando Tech Radar](https://github.com/zalando/tech-radar).
+technology radars.
 It allows you to track changes in your company's technology stack over time,
 visualizing technologies by categories and adoption status.
 
@@ -47,6 +47,56 @@ override these default values.
 - `--export-template` - export embedded (default) template to file for customization
 - `--meta` - path to metadata file (default: "meta.yaml")
 - `--version` - print version and exit
+
+### Customizing the Radar Template
+
+TeraGo uses an embedded HTML template for radar visualization. If you want to customize
+the appearance of your radar, you can export this template and modify it:
+
+```bash
+./terago --export-template ./my-template.html
+```
+
+This will create a file `my-template.html` with the default template content.
+You can then modify this file according to your needs and use it with the `--template` parameter:
+
+```bash
+./terago --input ./test/test_input --output ./output --template ./my-template.html
+```
+
+The template uses Go's [text/template](https://pkg.go.dev/text/template) package
+and has access to the following data:
+
+- `.Title` - Radar title from metadata
+- `.Date` - Current date
+- `.EntriesJSON` - Technologies data in JSON format
+
+The `.EntriesJSON` contains an array of technology entries with the following structure:
+
+```json
+[
+  {
+    "quadrant": 0,
+    "ring": 0,
+    "moved": 0,
+    "label": "Technology Name",
+    "link": "/quadrant/technology/",
+    "active": false
+  }
+]
+```
+
+Where:
+- `quadrant` - Quadrant index (0-3)
+- `ring` - Ring index (0-3)
+- `moved` - Movement indicator (-1 for deprecated, 0 for unchanged, 1 for improved, 2 for new)
+- `label` - Technology name
+- `link` - Technology link
+- `active` - Active status (always false in current implementation)
+
+The structure is defined in the [RadarEntry](pkg/core/template.go#L9-L16) struct,
+and the conversion from Technology to RadarEntry is done in the
+[convertTechnologiesToEntries](pkg/usecases/generateradar.go#L74-L98) function.
 
 ### Input Data Format
 

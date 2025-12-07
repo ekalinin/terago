@@ -30,7 +30,7 @@
     <svg id="radar"></svg>
 
     <script>
-        // Данные для радара в формате JSON
+        // Radar data in JSON format
         var radarEntries = {{.EntriesJSON }};
 
         radar_visualization({
@@ -50,10 +50,10 @@
             ],
             print_layout: true,
             quadrants: [
-                { name: "Языки и фреймворки", id: "q1" },
-                { name: "БД и платформы", id: "q2" },
-                { name: "Инфраструктура", id: "q3" },
-                { name: "Архитектура", id: "q4" },
+                { name: "Languages and Frameworks", id: "q1" },
+                { name: "Databases and Platforms", id: "q2" },
+                { name: "Infrastructure", id: "q3" },
+                { name: "Architecture", id: "q4" },
             ],
             title: "{{.Title}}",
             date: "{{.Date}}",
@@ -84,60 +84,57 @@
         <table>
             <tr>
                 <td>
-                    <h3>Технологический радар</h3>
-                    <span>Удобный инструмент, помогающий компании управлять
-                        своей платформой разработки и технологической
-                        стратегией. Радар объединяет используемые технологии
-                        в четыре категории: техники, языки и фреймворки,
-                        инструменты и платформы. Каждая из этих областей
-                        ранжируется по стадии внедрения:</span>
+                    <h3>Technology Radar</h3>
+                    <span>A convenient tool that helps a company manage its
+                        development platform and technology strategy. The radar
+                        combines the technologies used into four categories:
+                        techniques, languages and frameworks, tools and
+                        platforms. Each of these areas is ranked by adoption
+                        stage:</span>
                     <ul>
                         <li>
-                            <strong>ADOPT</strong> &mdash; технологии, в
-                            которых мы уверены, и рекомендованы к широкому
-                            использованию в компании, соответствуют культуре и
-                            целям компании.
+                            <strong>ADOPT</strong> &mdash; technologies we are
+                            confident in and recommend for widespread use in the
+                            company, matching the company's culture and goals.
                         </li>
                         <li>
-                            <strong>TRIAL</strong> &mdash; новый стек,
-                            используемый лишь в отдельных проектах для
-                            оценки рисков перед массовым внедрением.
+                            <strong>TRIAL</strong> &mdash; new stack used only in
+                            specific projects to assess risks before mass
+                            adoption.
                         </li>
                         <li>
-                            <strong>ASSESS</strong> &mdash; блидин эдж, ёрли
-                            превью, всякие экспериментальные штуки,
-                            потенциально имеющие ценность.
+                            <strong>ASSESS</strong> &mdash; bleeding edge, early
+                            preview, various experimental things that
+                            potentially have value.
                         </li>
                         <li>
-                            <strong>HOLD</strong> &mdash; депрекейтед
-                            легаси. Отжившие свой век технологии, которые не
-                            рекомендуется использовать для новых проектов,
-                            но допустимо сохранять в старых.
+                            <strong>HOLD</strong> &mdash; deprecated legacy.
+                            Technologies that have outlived their usefulness
+                            and are not recommended for new projects, but may
+                            be retained in old ones.
                         </li>
                     </ul>
                 </td>
                 <td>
-                    <h3>Цели</h3>
+                    <h3>Goals</h3>
                     <ul>
                         <li>
-                            Держать под контролем свои компетенции.
-                            Подготовка радара — это анализ происходящего —
-                            способ посмотреть в какую сторону движется
-                            индустрия, и как общие тренды соотносятся с
-                            нашим зоопарком.
+                            Keep your competencies under control. Preparing the
+                            radar is an analysis of what's happening - a way to
+                            look at which direction the industry is moving, and
+                            how general trends relate to our zoo.
                         </li>
                         <li>
-                            Принимать правильные архитектурные решения. У
-                            команд появляется источник информации о том,
-                            какие решения рекомендуется использовать для тех
-                            или иных целей.
+                            Make the right architectural decisions. Teams have a
+                            source of information about which solutions are
+                            recommended to use for which purposes.
                         </li>
                     </ul>
                     <br /><br />
-                    <h3>Наполнение</h3>
-                    <span>Технический радар поддерживается разработчиками в
-                        формате холивара. В нем отражены наши стремления,
-                        успехи и ошибки.</span>
+                    <h3>Content</h3>
+                    <span>The technical radar is maintained by developers in the
+                        form of a holywar. It reflects our aspirations, successes
+                        and mistakes.</span>
                 </td>
             </tr>
         </table>
