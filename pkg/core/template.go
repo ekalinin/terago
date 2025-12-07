@@ -19,6 +19,8 @@ type RadarEntry struct {
 type RadarData struct {
 	Title       string
 	Date        string
+	Version     string
+	GeneratedAt string
 	Entries     []RadarEntry
 	EntriesJSON template.JS // Adding field for JSON representation
 }

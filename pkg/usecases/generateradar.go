@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/ekalinin/terago/pkg/core"
 	"github.com/ekalinin/terago/pkg/radar"
@@ -134,9 +135,11 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		// Prepare data for template
 		formattedDate := formatDate(file.Date)
 		data := core.RadarData{
-			Title:   meta.Title,
-			Date:    formattedDate,
-			Entries: entries,
+			Title:       meta.Title,
+			Date:        formattedDate,
+			Version:     core.Version,
+			GeneratedAt: time.Now().Format("2006-01-02 15:04:05"),
+			Entries:     entries,
 		}
 		entriesJSON, err := data.ToJSON()
 		if err != nil {

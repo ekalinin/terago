@@ -69,6 +69,8 @@ and has access to the following data:
 
 - `.Title` - Radar title from metadata
 - `.Date` - Current date
+- `.Version` - Application version (see [version.go](pkg/core/version.go#L4))
+- `.GeneratedAt` - Timestamp when the radar was generated (see [template.go](pkg/core/template.go#L18-L26))
 - `.EntriesJSON` - Technologies data in JSON format
 
 The `.EntriesJSON` contains an array of technology entries with the following structure:
