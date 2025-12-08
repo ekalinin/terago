@@ -1,6 +1,6 @@
 # TeraGo - Technology Radar in Go
 
-[![Build Status][build-badge]][build-url] [![Download][download-badge]][download-url]
+[![Build Status][build-badge]][build-url] [![Download][download-badge]][download-url] [![Test Status][test-badge]][test-url]
 
 ## Table of Contents
 
@@ -102,6 +102,10 @@ and has access to the following data:
 - `.Version` - Application version (see [version.go](pkg/core/version.go#L4))
 - `.GeneratedAt` - Timestamp when the radar was generated (see [template.go](pkg/core/template.go#L18-L26))
 - `.EntriesJSON` - Technologies data in JSON format
+- `.Quadrants` - Array of quadrants from metadata
+- `.Rings` - Array of rings from metadata
+- `.QuadrantsJSON` - Quadrants data in JSON format
+- `.RingsJSON` - Rings data in JSON format
 
 The `.EntriesJSON` contains an array of technology entries with the following structure:
 
@@ -129,6 +133,29 @@ Where:
 The structure is defined in the [RadarEntry](pkg/core/template.go#L9-L16) struct,
 and the conversion from Technology to RadarEntry is done in the
 [convertTechnologiesToEntries](pkg/usecases/generateradar.go#L74-L98) function.
+
+The `.QuadrantsJSON` contains an array of quadrants with the following structure:
+
+```json
+[
+  {
+    "name": "Quadrant Name",
+    "id": "q1"
+  }
+]
+```
+
+The `.RingsJSON` contains an array of rings with the following structure:
+
+```json
+[
+  {
+    "name": "RING NAME",
+    "color": "#93c47d",
+    "id": "ring-alias"
+  }
+]
+```
 
 ### Input Data Format
 
@@ -199,5 +226,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 <!-- Badge links -->
 [build-badge]: https://github.com/ekalinin/terago/actions/workflows/release.yml/badge.svg
 [build-url]: https://github.com/ekalinin/terago/actions/workflows/release.yml
+[test-badge]: https://github.com/ekalinin/terago/actions/workflows/test.yml/badge.svg
+[test-url]: https://github.com/ekalinin/terago/actions/workflows/test.yml
 [download-badge]: https://img.shields.io/github/v/release/ekalinin/terago
 [download-url]: https://github.com/ekalinin/terago/releases/latest
