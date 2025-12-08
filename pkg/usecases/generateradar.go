@@ -140,12 +140,12 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 			Version:     core.Version,
 			GeneratedAt: time.Now().Format("2006-01-02 15:04:05"),
 			Entries:     entries,
+			Quadrants:   meta.Quadrants,
+			Rings:       meta.Rings,
 		}
-		entriesJSON, err := data.ToJSON()
-		if err != nil {
+		if err := data.UpdateJSON(); err != nil {
 			return err
 		}
-		data.EntriesJSON = entriesJSON
 
 		// Create output file
 		outputFile := filepath.Join(outputDir, file.Date+".html")
