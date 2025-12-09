@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"html/template"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -99,7 +100,7 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 }
 
 // GenerateRadar generates Radar (HTML file).
-func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta) error {
+func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose bool) error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -127,8 +128,20 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		return err
 	}
 
-	// Process each file and generate HTML
+	// Process each file and generate HTML only if it doesn't exist or force is true
 	for _, file := range files {
+		// Check if HTML file already exists
+		outputFile := filepath.Join(outputDir, file.Date+".html")
+		if !force {
+			if _, err := os.Stat(outputFile); err == nil {
+				// File exists and force is false, skip generation
+				if verbose {
+					log.Printf("Skipping %s.html (already exists, use --force to regenerate)", file.Date)
+				}
+				continue
+			}
+		}
+
 		// Convert technologies to radar entries
 		entries := convertTechnologiesToEntries(file.Technologies, meta)
 
@@ -148,7 +161,6 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		}
 
 		// Create output file
-		outputFile := filepath.Join(outputDir, file.Date+".html")
 		f, err := os.Create(outputFile)
 		if err != nil {
 			return err
@@ -158,6 +170,10 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		// Execute template
 		if err := tmpl.Execute(f, data); err != nil {
 			return err
+		}
+
+		if verbose {
+			log.Printf("Generated %s.html", file.Date)
 		}
 	}
 

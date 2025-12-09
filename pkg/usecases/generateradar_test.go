@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ekalinin/terago/pkg/core"
@@ -213,5 +215,97 @@ func TestFormatDate(t *testing.T) {
 				t.Errorf("formatDate(%q) = %q, want %q", tt.input, result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestGenerateRadarWithForce(t *testing.T) {
+	// Create temporary directory for testing
+	tempDir, err := os.MkdirTemp("", "terago_test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create test data
+	meta := core.Meta{
+		Title: "Test Radar",
+		Quadrants: []core.Quadrant{
+			{Name: "Languages", Alias: "languages"},
+			{Name: "Frameworks", Alias: "frameworks"},
+		},
+		Rings: []core.Ring{
+			{Name: "Adopt", Alias: "adopt"},
+			{Name: "Trial", Alias: "trial"},
+		},
+	}
+
+	files := []core.TechnologiesFile{
+		{
+			Date: "20231201",
+			Technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+			},
+		},
+		{
+			Date: "20231202",
+			Technologies: []core.Technology{
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+			},
+		},
+	}
+
+	// Test 1: Generate without force (should create files)
+	err = GenerateRadar(tempDir, "", files, meta, false, false)
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Check that files were created
+	file1 := filepath.Join(tempDir, "20231201.html")
+	file2 := filepath.Join(tempDir, "20231202.html")
+
+	if _, err := os.Stat(file1); os.IsNotExist(err) {
+		t.Error("File 20231201.html should have been created")
+	}
+	if _, err := os.Stat(file2); os.IsNotExist(err) {
+		t.Error("File 20231202.html should have been created")
+	}
+
+	// Get file modification times
+	info1, _ := os.Stat(file1)
+	info2, _ := os.Stat(file2)
+	modTime1 := info1.ModTime()
+	modTime2 := info2.ModTime()
+
+	// Test 2: Generate without force again (should not modify existing files)
+	err = GenerateRadar(tempDir, "", files, meta, false, false)
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Check that files were not modified
+	info1After, _ := os.Stat(file1)
+	info2After, _ := os.Stat(file2)
+	if !info1After.ModTime().Equal(modTime1) {
+		t.Error("File 20231201.html should not have been modified when force=false")
+	}
+	if !info2After.ModTime().Equal(modTime2) {
+		t.Error("File 20231202.html should not have been modified when force=false")
+	}
+
+	// Test 3: Generate with force (should modify existing files)
+	err = GenerateRadar(tempDir, "", files, meta, true, false)
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Check that files were modified
+	info1AfterForce, _ := os.Stat(file1)
+	info2AfterForce, _ := os.Stat(file2)
+	if !info1AfterForce.ModTime().After(modTime1) {
+		t.Error("File 20231201.html should have been modified when force=true")
+	}
+	if !info2AfterForce.ModTime().After(modTime2) {
+		t.Error("File 20231202.html should have been modified when force=true")
 	}
 }

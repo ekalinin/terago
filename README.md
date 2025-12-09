@@ -69,6 +69,26 @@ used for quadrants and rings. These default values can be found in the
 [source code](pkg/core/meta.go#L101-L115). The meta.yml file can partially
 override these default values.
 
+**Incremental Generation**: By default, TeraGo only generates HTML files for YAML files that don't have corresponding HTML files yet. This makes incremental updates efficient when adding new technology files.
+
+**Force Regeneration**: To regenerate all HTML files (useful when updating templates or metadata), use the `--force` flag:
+
+```bash
+./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --force
+```
+
+**Verbose Logging**: To see detailed information about file processing (which files are being generated or skipped), use the `--verbose` flag:
+
+```bash
+./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --verbose
+```
+
+You can combine both flags:
+
+```bash
+./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --force --verbose
+```
+
 ### Command Line Parameters
 
 - `--input` - path to directory with technology YAML files (required)
@@ -76,6 +96,8 @@ override these default values.
 - `--template` - path to HTML template (if empty, uses default embedded template)
 - `--export-template` - export embedded (default) template to file for customization
 - `--meta` - path to metadata file (default: "meta.yaml")
+- `--force` - force regeneration of all HTML files (ignore existing files)
+- `--verbose` - enable verbose logging (show file processing details)
 - `--version` - print version and exit
 
 ### Customizing the Radar Template

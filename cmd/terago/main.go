@@ -18,7 +18,8 @@ func main() {
 	exportTemplate := flag.String("export-template", "", "Export embedded (default) template to file (for customization)")
 	metaPath := flag.String("meta", "meta.yaml", "path to meta file")
 	showVersion := flag.Bool("version", false, "print version")
-	// debugMode := flag.Bool("debug", false, "enable debug mode")
+	forceRegenerate := flag.Bool("force", false, "force regeneration of all HTML files (ignore existing files)")
+	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
 
 	flag.Parse()
 
@@ -37,10 +38,14 @@ func main() {
 		os.Exit(0)
 	}
 
-	log.Println("Start, input=", *inputDir, ", output=", *outputDir, ", template=", *templatePath, ", meta=", *metaPath)
+	if *verbose {
+		log.Println("Start, input=", *inputDir, ", output=", *outputDir, ", template=", *templatePath, ", meta=", *metaPath)
+	}
 
 	// Try to read meta file, use defaults if not available
-	log.Printf("Reading meta file: %s", *metaPath)
+	if *verbose {
+		log.Println("Reading meta file: ", *metaPath)
+	}
 	meta, err := usecases.ReadMeta(*metaPath)
 	if err != nil {
 		log.Fatalf("Failed to read meta file: %v", err)
@@ -54,8 +59,11 @@ func main() {
 		log.Fatalf("Failed to read input directory: %v", err)
 	}
 
-	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta); err != nil {
+	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose); err != nil {
 		log.Fatalf("Failed to generate radar: %v", err)
 	}
-	log.Println("Done.")
+
+	if *verbose {
+		log.Println("Done.")
+	}
 }
