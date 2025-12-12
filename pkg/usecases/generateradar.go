@@ -73,7 +73,8 @@ func formatDate(dateStr string) string {
 }
 
 // convertTechnologiesToEntries converts Technology structs to RadarEntry structs
-func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta) []core.RadarEntry {
+// If includeLinks is true, Link field will be populated based on technology name and quadrant
+func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta, includeLinks bool) []core.RadarEntry {
 	var entries []core.RadarEntry
 
 	for _, tech := range technologies {
@@ -81,16 +82,20 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 		ringIndex := getRingIndex(tech.Ring, meta.Rings)
 		moved := getMovedValue(tech, meta.Rings)
 
-		// Create link based on technology name and quadrant
-		link := "/" + tech.Quadrant + "/" + tech.Name + "/"
+		// Create link based on technology name and quadrant if includeLinks is true
+		link := ""
+		if includeLinks {
+			link = "/" + tech.Quadrant + "/" + tech.Name + "/"
+		}
 
 		entry := core.RadarEntry{
-			Quadrant: quadrantIndex,
-			Ring:     ringIndex,
-			Moved:    moved,
-			Label:    tech.Name,
-			Link:     link,
-			Active:   false,
+			Quadrant:    quadrantIndex,
+			Ring:        ringIndex,
+			Moved:       moved,
+			Label:       tech.Name,
+			Link:        link,
+			Active:      false,
+			Description: tech.Description,
 		}
 
 		entries = append(entries, entry)
@@ -100,7 +105,8 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 }
 
 // GenerateRadar generates Radar (HTML file).
-func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose bool) error {
+// If includeLinks is true, each radar entry will have a link based on its quadrant and name.
+func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks bool) error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -143,7 +149,7 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		}
 
 		// Convert technologies to radar entries
-		entries := convertTechnologiesToEntries(file.Technologies, meta)
+		entries := convertTechnologiesToEntries(file.Technologies, meta, includeLinks)
 
 		// Prepare data for template
 		formattedDate := formatDate(file.Date)
@@ -159,6 +165,8 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		if err := data.UpdateJSON(); err != nil {
 			return err
 		}
+		// Set description JavaScript
+		data.SetDescriptionJS(radar.DescriptionJS)
 
 		// Create output file
 		f, err := os.Create(outputFile)

@@ -9,6 +9,7 @@ import (
 	"github.com/ekalinin/terago/pkg/core"
 )
 
+// ReadMeta reads meta data from file.
 func ReadMeta(filePath string) (core.Meta, error) {
 	// If filePath is empty, return default meta
 	if filePath == "" {

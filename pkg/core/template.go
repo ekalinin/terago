@@ -9,12 +9,13 @@ import (
 
 // RadarEntry represents an entry in the radar visualization
 type RadarEntry struct {
-	Quadrant int    `json:"quadrant"`
-	Ring     int    `json:"ring"`
-	Moved    int    `json:"moved"`
-	Label    string `json:"label"`
-	Link     string `json:"link"`
-	Active   bool   `json:"active"`
+	Quadrant    int    `json:"quadrant"`
+	Ring        int    `json:"ring"`
+	Moved       int    `json:"moved"`
+	Label       string `json:"label"`
+	Link        string `json:"link"`
+	Active      bool   `json:"active"`
+	Description string `json:"description"`
 }
 
 // RadarData represents the data needed for the HTML template
@@ -30,6 +31,7 @@ type RadarData struct {
 	EntriesJSON   template.JS
 	QuadrantsJSON template.JS
 	RingsJSON     template.JS
+	DescriptionJS template.JS // JavaScript for description modal
 }
 
 // UpdateJSON updates all JSON fields in the RadarData struct
@@ -92,4 +94,9 @@ func (rd *RadarData) UpdateJSON() error {
 	rd.RingsJSON = template.JS(ringsJSON)
 
 	return nil
+}
+
+// SetDescriptionJS sets the JavaScript code for description modal
+func (rd *RadarData) SetDescriptionJS(js string) {
+	rd.DescriptionJS = template.JS(js)
 }

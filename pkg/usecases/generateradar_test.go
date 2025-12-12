@@ -255,7 +255,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 1: Generate without force (should create files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false)
+	err = GenerateRadar(tempDir, "", files, meta, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -278,7 +278,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	modTime2 := info2.ModTime()
 
 	// Test 2: Generate without force again (should not modify existing files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false)
+	err = GenerateRadar(tempDir, "", files, meta, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -294,7 +294,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 3: Generate with force (should modify existing files)
-	err = GenerateRadar(tempDir, "", files, meta, true, false)
+	err = GenerateRadar(tempDir, "", files, meta, true, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
