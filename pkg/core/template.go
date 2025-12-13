@@ -32,6 +32,7 @@ type RadarData struct {
 	QuadrantsJSON template.JS
 	RingsJSON     template.JS
 	DescriptionJS template.JS // JavaScript for description modal
+	ChangesTable  template.HTML // HTML table with changes
 }
 
 // UpdateJSON updates all JSON fields in the RadarData struct
@@ -99,4 +100,9 @@ func (rd *RadarData) UpdateJSON() error {
 // SetDescriptionJS sets the JavaScript code for description modal
 func (rd *RadarData) SetDescriptionJS(js string) {
 	rd.DescriptionJS = template.JS(js)
+}
+
+// SetChangesTable sets the HTML table with changes
+func (rd *RadarData) SetChangesTable(html string) {
+	rd.ChangesTable = template.HTML(html)
 }

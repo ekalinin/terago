@@ -104,9 +104,65 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 	return entries
 }
 
+// buildChangesTable creates an HTML table with changed or new technologies
+func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
+	var changedTechs []core.Technology
+
+	// Filter technologies that are new or moved
+	for _, tech := range technologies {
+		if tech.IsNew || tech.IsMoved {
+			changedTechs = append(changedTechs, tech)
+		}
+	}
+
+	// If no changes, return empty string
+	if len(changedTechs) == 0 {
+		return ""
+	}
+
+	// Build HTML table
+	html := `
+	<div class="changes-section">
+		<h3>Changes in this Radar</h3>
+		<table class="changes-table">
+			<thead>
+				<tr>
+					<th>Technology</th>
+					<th>Quadrant</th>
+					<th>Status</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>`
+
+	for _, tech := range changedTechs {
+		status := ""
+		if tech.IsNew {
+			status = "NEW"
+		} else if tech.IsMoved {
+			status = "MOVED: " + tech.PreviousRing + " → " + tech.Ring
+		}
+
+		html += "\n\t\t\t\t<tr>"
+		html += "\n\t\t\t\t\t<td><strong>" + tech.Name + "</strong></td>"
+		html += "\n\t\t\t\t\t<td>" + tech.Quadrant + "</td>"
+		html += "\n\t\t\t\t\t<td class=\"status-" + strings.ToLower(tech.Ring) + "\">" + status + "</td>"
+		html += "\n\t\t\t\t\t<td>" + tech.Description + "</td>"
+		html += "\n\t\t\t\t</tr>"
+	}
+
+	html += `
+			</tbody>
+		</table>
+	</div>`
+
+	return html
+}
+
 // GenerateRadar generates Radar (HTML file).
 // If includeLinks is true, each radar entry will have a link based on its quadrant and name.
-func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks bool) error {
+// If addChanges is true, a table with changed or new technologies will be included.
+func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks, addChanges bool) error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -167,6 +223,12 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		}
 		// Set description JavaScript
 		data.SetDescriptionJS(radar.DescriptionJS)
+
+		// Build and set changes table if addChanges is true
+		if addChanges {
+			changesHTML := buildChangesTable(file.Technologies, meta)
+			data.SetChangesTable(changesHTML)
+		}
 
 		// Create output file
 		f, err := os.Create(outputFile)

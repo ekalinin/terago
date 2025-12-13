@@ -21,6 +21,7 @@ func main() {
 	forceRegenerate := flag.Bool("force", false, "force regeneration of all HTML files (ignore existing files)")
 	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
 	includeLinks := flag.Bool("include-links", false, "include links in radar entries (based on quadrant and technology name)")
+	addChanges := flag.Bool("add-changes", false, "add table with description of changed or new technologies")
 
 	flag.Parse()
 
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	// Generate radar (html files)
-	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose, *includeLinks); err != nil {
+	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose, *includeLinks, *addChanges); err != nil {
 		log.Fatalf("Failed to generate radar: %v", err)
 	}
 

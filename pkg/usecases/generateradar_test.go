@@ -3,6 +3,7 @@ package usecases
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ekalinin/terago/pkg/core"
@@ -255,7 +256,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 1: Generate without force (should create files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false, false)
+	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -278,7 +279,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	modTime2 := info2.ModTime()
 
 	// Test 2: Generate without force again (should not modify existing files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false, false)
+	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -294,7 +295,7 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 3: Generate with force (should modify existing files)
-	err = GenerateRadar(tempDir, "", files, meta, true, false, false)
+	err = GenerateRadar(tempDir, "", files, meta, true, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -307,5 +308,159 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 	if !info2AfterForce.ModTime().After(modTime2) {
 		t.Error("File 20231202.html should have been modified when force=true")
+	}
+}
+
+func TestGenerateRadarWithChanges(t *testing.T) {
+	// Create temporary directory for testing
+	tempDir, err := os.MkdirTemp("", "terago_test_changes")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create test data with new and moved technologies
+	meta := core.Meta{
+		Title: "Test Radar with Changes",
+		Quadrants: []core.Quadrant{
+			{Name: "Languages", Alias: "languages"},
+			{Name: "Frameworks", Alias: "frameworks"},
+		},
+		Rings: []core.Ring{
+			{Name: "Adopt", Alias: "adopt"},
+			{Name: "Trial", Alias: "trial"},
+			{Name: "Assess", Alias: "assess"},
+		},
+	}
+
+	files := []core.TechnologiesFile{
+		{
+			Date: "20231201",
+			Technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Fast and efficient", IsNew: true},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "UI library", IsMoved: true, PreviousRing: "Assess"},
+			},
+		},
+	}
+
+	// Test 1: Generate with addChanges=false (should not include changes table)
+	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false)
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Read the generated file
+	outputFile := filepath.Join(tempDir, "20231201.html")
+	content, err := os.ReadFile(outputFile)
+	if err != nil {
+		t.Fatalf("Failed to read output file: %v", err)
+	}
+
+	// Should not contain changes table
+	if strings.Contains(string(content), "Changes in this Radar") {
+		t.Error("Output should not contain changes table when addChanges=false")
+	}
+
+	// Test 2: Generate with addChanges=true (should include changes table)
+	err = GenerateRadar(tempDir, "", files, meta, true, false, false, true)
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Read the generated file
+	content, err = os.ReadFile(outputFile)
+	if err != nil {
+		t.Fatalf("Failed to read output file: %v", err)
+	}
+
+	// Should contain changes table
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "changes-section") {
+		t.Error("Output should contain changes section when addChanges=true")
+	}
+	if !strings.Contains(contentStr, "Changes in this Radar") {
+		t.Error("Output should contain changes title")
+	}
+	if !strings.Contains(contentStr, "Go") {
+		t.Error("Output should contain Go technology")
+	}
+	if !strings.Contains(contentStr, "React") {
+		t.Error("Output should contain React technology")
+	}
+	if !strings.Contains(contentStr, "NEW") {
+		t.Error("Output should contain NEW status for Go")
+	}
+	if !strings.Contains(contentStr, "MOVED") {
+		t.Error("Output should contain MOVED status for React")
+	}
+}
+
+func TestBuildChangesTable(t *testing.T) {
+	meta := core.Meta{
+		Rings: []core.Ring{
+			{Name: "Adopt", Alias: "adopt"},
+			{Name: "Trial", Alias: "trial"},
+		},
+	}
+
+	tests := []struct {
+		name         string
+		technologies []core.Technology
+		wantContains []string
+		wantEmpty    bool
+	}{
+		{
+			name: "with new technology",
+			technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Fast language", IsNew: true},
+			},
+			wantContains: []string{"Go", "NEW", "Fast language", "Languages"},
+			wantEmpty:    false,
+		},
+		{
+			name: "with moved technology",
+			technologies: []core.Technology{
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "UI library", IsMoved: true, PreviousRing: "Adopt"},
+			},
+			wantContains: []string{"React", "MOVED", "Adopt", "Trial", "UI library"},
+			wantEmpty:    false,
+		},
+		{
+			name: "with no changes",
+			technologies: []core.Technology{
+				{Name: "Docker", Ring: "Adopt", Quadrant: "Infrastructure", Description: "Container platform", IsNew: false, IsMoved: false},
+			},
+			wantContains: []string{},
+			wantEmpty:    true,
+		},
+		{
+			name: "with mixed technologies",
+			technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Fast", IsNew: true},
+				{Name: "Docker", Ring: "Adopt", Quadrant: "Infrastructure", Description: "Containers", IsNew: false, IsMoved: false},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "UI", IsMoved: true, PreviousRing: "Assess"},
+			},
+			wantContains: []string{"Go", "React", "NEW", "MOVED"},
+			wantEmpty:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := buildChangesTable(tt.technologies, meta)
+
+			if tt.wantEmpty {
+				if result != "" {
+					t.Errorf("Expected empty result, got: %s", result)
+				}
+				return
+			}
+
+			for _, want := range tt.wantContains {
+				if !strings.Contains(result, want) {
+					t.Errorf("Expected result to contain %q, but it doesn't. Result: %s", want, result)
+				}
+			}
+		})
 	}
 }
