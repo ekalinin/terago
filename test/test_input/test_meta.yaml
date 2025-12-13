@@ -1,5 +1,5 @@
-title: "Тестовый Технологический Радар"
-description: "Пример технологического радара для демонстрации"
+title: "Test technical radar"
+description: "Example technical radar for demonstration"
 quadrants:
   - name: "Languages"
     alias: "languages"

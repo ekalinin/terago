@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test technical radar</title>
+</head>
+
+<body>
+    <style>
+        body {
+            font-family: helvetica, arial, 'Source Sans Pro', sans-serif;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+         
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .modal-body {
+            color: #666;
+            line-height: 1.6;
+        }
+
+         
+        .changes-section {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .changes-section h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .changes-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .changes-table thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .changes-table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .changes-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .changes-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .changes-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .changes-table .status-adopt {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .changes-table .status-trial {
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .changes-table .status-assess {
+            color: #FF9800;
+            font-weight: bold;
+        }
+
+        .changes-table .status-hold {
+            color: #F44336;
+            font-weight: bold;
+        }
+    </style>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://zalando.github.io/tech-radar/release/radar-0.12.js"></script>
+
+    
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <svg id="radar"></svg>
+
+    
+	<div class="changes-section">
+		<h3>Changes in this Radar</h3>
+		<table class="changes-table">
+			<thead>
+				<tr>
+					<th>Technology</th>
+					<th>Quadrant</th>
+					<th>Status</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><strong>Go</strong></td>
+					<td>Languages</td>
+					<td class="status-trial">NEW</td>
+					<td>Effective programming language</td>
+				</tr>
+				<tr>
+					<td><strong>React</strong></td>
+					<td>Frameworks</td>
+					<td class="status-trial">NEW</td>
+					<td>Library for creating user interfaces</td>
+				</tr>
+				<tr>
+					<td><strong>Docker</strong></td>
+					<td>Infrastructure</td>
+					<td class="status-adopt">NEW</td>
+					<td>Platform for containerizing applications</td>
+				</tr>
+				<tr>
+					<td><strong>Microservices</strong></td>
+					<td>Architecture</td>
+					<td class="status-assess">NEW</td>
+					<td>Approach to software architecture</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+    <script>
+        
+        var radarEntries = [{"quadrant":0,"ring":1,"moved":2,"label":"Go","link":"","active":false,"description":"Effective programming language"},{"quadrant":1,"ring":1,"moved":2,"label":"React","link":"","active":false,"description":"Library for creating user interfaces"},{"quadrant":2,"ring":0,"moved":2,"label":"Docker","link":"","active":false,"description":"Platform for containerizing applications"},{"quadrant":3,"ring":2,"moved":2,"label":"Microservices","link":"","active":false,"description":"Approach to software architecture"}];
+
+        radar_visualization({
+            svg_id: "radar",
+            width: 1450,
+            height: 1050,
+            colors: {
+                background: "#fff",
+                grid: "#dddde0",
+                inactive: "#ddd",
+            },
+            rings: [{"name":"ADOPT","color":"#93c47d","id":"adopt"},{"name":"TRIAL","color":"#93d2c2","id":"trial"},{"name":"ASSESS","color":"#fbdb84","id":"assess"},{"name":"HOLD","color":"#efafa9","id":"hold"}],
+            print_layout: true,
+            quadrants: [{"name":"Languages","id":"q1"},{"name":"Frameworks","id":"q2"},{"name":"Infrastructure","id":"q3"},{"name":"Architecture","id":"q4"}],
+            title: "Test technical radar",
+            date: "2023-12-01",
+            links_in_new_tabs: true,
+            entries: radarEntries
+        });
+
+        // Modal functionality using D3.js
+var modal = d3.select("#descriptionModal");
+var modalTitle = d3.select("#modalTitle");
+var modalDescription = d3.select("#modalDescription");
+var closeBtn = d3.select(".close");
+
+// Create a map for faster lookup by ID
+var entriesById = {};
+radarEntries.forEach(function(entry, index) {
+    // The radar library assigns IDs starting from 1
+    entriesById[index + 1] = entry;
+});
+
+// Function to show modal
+function showModal(entry) {
+    if (entry && entry.description) {
+        modalTitle.text(entry.label);
+        modalDescription.text(entry.description);
+        modal.style("display", "block");
+    }
+}
+
+// Function to hide modal
+function hideModal() {
+    modal.style("display", "none");
+}
+
+// Wait for radar to be rendered and force simulation to complete
+setTimeout(function() {
+    // Add click handlers to all blip groups
+    d3.selectAll("#radar g.blip")
+        .style("cursor", "pointer")
+        .on("click", function(event, d) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // The data is bound to the element, so we can access it directly
+            if (d && d.label) {
+                var entry = radarEntries.find(function(e) {
+                    return e.label === d.label;
+                });
+                if (entry) {
+                    showModal(entry);
+                }
+            }
+        });
+
+    // Add click handlers to legend items
+    d3.selectAll("#radar .legend .blip-list-item")
+        .style("cursor", "pointer")
+        .on("click", function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var listItem = d3.select(this);
+            var linkElement = listItem.select("a");
+
+            if (linkElement.node()) {
+                var fullText = linkElement.text().trim();
+                // Extract label by removing the number prefix (e.g., "1. React" -> "React")
+                var label = fullText.replace(/^\d+\.\s*/, "");
+                
+                var entry = radarEntries.find(function(e) {
+                    return e.label === label;
+                });
+
+                if (entry) {
+                    showModal(entry);
+                }
+            }
+        });
+}, 2000);
+
+// Close modal when clicking the X button
+closeBtn.on("click", function(event) {
+    event.preventDefault();
+    hideModal();
+});
+
+// Close modal when clicking outside of it
+modal.on("click", function(event) {
+    if (event.target === modal.node()) {
+        hideModal();
+    }
+});
+
+// Close modal on Escape key
+d3.select("body").on("keydown", function(event) {
+    if (event.key === "Escape" || event.keyCode === 27) {
+        hideModal();
+    }
+});
+
+
+    </script>
+
+
+    <style>
+        .legend li {
+            margin: 25px 50px 0 0;
+        }
+
+        .legend table {
+            width: 1000px;
+            margin: 0;
+            font-size: 80%;
+        }
+
+        .legend td {
+            width: 50%;
+            vertical-align: top;
+            padding-right: 60px;
+        }
+    </style>
+    <div class="legend">
+        <table>
+            <tr>
+                <td>
+                    <h3>Technology Radar</h3>
+                    <span>A convenient tool that helps a company manage its
+                        development platform and technology strategy. The radar
+                        combines the technologies used into four categories:
+                        techniques, languages and frameworks, tools and
+                        platforms. Each of these areas is ranked by adoption
+                        stage:</span>
+                    <ul>
+                        <li>
+                            <strong>ADOPT</strong> &mdash; technologies we are
+                            confident in and recommend for widespread use in the
+                            company, matching the company's culture and goals.
+                        </li>
+                        <li>
+                            <strong>TRIAL</strong> &mdash; new stack used only in
+                            specific projects to assess risks before mass
+                            adoption.
+                        </li>
+                        <li>
+                            <strong>ASSESS</strong> &mdash; bleeding edge, early
+                            preview, various experimental things that
+                            potentially have value.
+                        </li>
+                        <li>
+                            <strong>HOLD</strong> &mdash; deprecated legacy.
+                            Technologies that have outlived their usefulness
+                            and are not recommended for new projects, but may
+                            be retained in old ones.
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <h3>Goals</h3>
+                    <ul>
+                        <li>
+                            Keep your competencies under control. Preparing the
+                            radar is an analysis of what's happening - a way to
+                            look at which direction the industry is moving, and
+                            how general trends relate to our zoo.
+                        </li>
+                        <li>
+                            Make the right architectural decisions. Teams have a
+                            source of information about which solutions are
+                            recommended to use for which purposes.
+                        </li>
+                    </ul>
+                    <br /><br />
+                    <h3>Content</h3>
+                    <span>The technical radar is maintained by developers in the
+                        form of a holywar. It reflects our aspirations, successes
+                        and mistakes.</span>
+                    <p><strong>Generated at:</strong> 2025-12-13 13:07:54</p>
+                    <p><strong>Generated by:</strong> <a
+                            href="https://github.com/ekalinin/terago">terago</a>@0.2.0</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</body>
+
+</html>

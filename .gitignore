@@ -2,9 +2,6 @@
 build/
 bin/
 
-# Test outputs
-test_output/
-
 # IDE files
 .vscode/
 *.swp

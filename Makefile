@@ -37,10 +37,10 @@ test: build
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
 
 # Quick run (without rebuilding)
-run: 
+run:
 	@echo "Running on test data..."
 	@mkdir -p $(TEST_OUTPUT_DIR)
-	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --meta $(META_PATH)
+	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --meta $(META_PATH) --add-changes --force
 	@echo "Test completed. Results in directory: $(TEST_OUTPUT_DIR)"
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
 
