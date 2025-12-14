@@ -6,9 +6,21 @@ TEST_INPUT_DIR=test/test_input
 TEST_OUTPUT_DIR=test/test_output
 TEMPLATE_PATH=pkg/radar/radar.html
 META_PATH=$(TEST_INPUT_DIR)/meta.yaml
+RADAR_PKG_DIR=pkg/radar
+
+# JavaScript library versions (single source of truth)
+D3_VERSION=7.9.0          # Full D3.js version (for documentation)
+D3_MAJOR_VERSION=7        # Major version used in D3.js CDN URL
+RADAR_VERSION=0.12        # Zalando Tech Radar version
+
+# JavaScript library URLs and filenames
+D3_URL=https://d3js.org/d3.v$(D3_MAJOR_VERSION).min.js
+RADAR_URL=https://zalando.github.io/tech-radar/release/radar-$(RADAR_VERSION).js
+D3_FILE=$(RADAR_PKG_DIR)/d3.min.js
+RADAR_FILE=$(RADAR_PKG_DIR)/radar.min.js
 
 # Main commands
-.PHONY: all build clean test run-test help
+.PHONY: all build clean test run-test help update-libs minify-libs build-minifier
 
 # Default target - build the project
 all: build
@@ -50,6 +62,44 @@ deps:
 	go mod download
 	go mod tidy
 	@echo "Dependencies installed"
+
+# Build minifier tool
+build-minifier:
+	@echo "Building minifier tool..."
+	@go build -o $(BUILD_DIR)/minifyjs ./cmd/minifyjs
+	@echo "Minifier tool built: $(BUILD_DIR)/minifyjs"
+
+# Download JavaScript libraries
+download-libs:
+	@echo "Downloading JavaScript libraries..."
+	@echo "  D3.js version: $(D3_VERSION)"
+	@echo "  Radar version: $(RADAR_VERSION)"
+	@mkdir -p $(RADAR_PKG_DIR)
+	@echo "Downloading D3.js..."
+	@curl -sS -L -o $(D3_FILE) $(D3_URL)
+	@echo "Downloading Zalando Tech Radar..."
+	@curl -sS -L -o $(RADAR_FILE).tmp.js $(RADAR_URL)
+	@echo "Libraries downloaded"
+
+# Minify JavaScript libraries
+minify-libs: build-minifier
+	@echo "Minifying radar.min.js..."
+	@if [ -f "$(RADAR_FILE).tmp.js" ]; then \
+		./$(BUILD_DIR)/minifyjs -input $(RADAR_FILE).tmp.js -output $(RADAR_FILE); \
+	else \
+		echo "Error: $(RADAR_FILE).tmp.js not found. Run 'make download-libs' first."; \
+		exit 1; \
+	fi
+
+# Update JavaScript libraries (download + minify)
+update-libs: download-libs minify-libs
+	@echo "JavaScript libraries updated successfully"
+	@rm -f $(RADAR_FILE).tmp.js
+	@echo "Cleanup completed"
+	@echo ""
+	@echo "Library versions:"
+	@echo "  D3.js: $(D3_VERSION)"
+	@echo "  Radar: $(RADAR_VERSION)"
 
 # Format code
 fmt:
@@ -160,19 +210,23 @@ release: clean fmt vet test tag goreleaser
 # Help
 help:
 	@echo "Available commands:"
-	@echo "  build      - Build the project"
-	@echo "  clean      - Clean up temporary files"
-	@echo "  test       - Build and run on test data"
-	@echo "  test-unit  - Run unit tests"
-	@echo "  run        - Run on test data (without rebuilding)"
-	@echo "  deps       - Install dependencies"
-	@echo "  fmt        - Format code"
-	@echo "  vet        - Check code"
-	@echo "  check      - Format, check and test"
-	@echo "  setup-test - Create test data"
-	@echo "  demo       - Full setup and demo run"
-	@echo "  release    - Build release version"
-	@echo "  goreleaser - Create release with Goreleaser"
+	@echo "  build              - Build the project"
+	@echo "  clean              - Clean up temporary files"
+	@echo "  test               - Build and run on test data"
+	@echo "  test-unit          - Run unit tests"
+	@echo "  run                - Run on test data (without rebuilding)"
+	@echo "  deps               - Install dependencies"
+	@echo "  fmt                - Format code"
+	@echo "  vet                - Check code"
+	@echo "  check              - Format, check and test"
+	@echo "  setup-test         - Create test data"
+	@echo "  demo               - Full setup and demo run"
+	@echo "  release            - Build release version"
+	@echo "  goreleaser         - Create release with Goreleaser"
 	@echo "  goreleaser-snapshot - Create snapshot with Goreleaser"
-	@echo "  goreleaser-check - Check Goreleaser configuration"
-	@echo "  help       - Show this help"
+	@echo "  goreleaser-check   - Check Goreleaser configuration"
+	@echo "  build-minifier     - Build JavaScript minifier tool"
+	@echo "  download-libs      - Download JavaScript libraries"
+	@echo "  minify-libs        - Minify JavaScript libraries"
+	@echo "  update-libs        - Download and minify libraries (download-libs + minify-libs)"
+	@echo "  help               - Show this help"

@@ -98,7 +98,18 @@ You can combine both flags:
 - `--meta` - path to metadata file (default: "meta.yaml")
 - `--force` - force regeneration of all HTML files (ignore existing files)
 - `--verbose` - enable verbose logging (show file processing details)
+- `--include-links` - include links in radar entries (based on quadrant and technology name)
+- `--add-changes` - add table with description of changed or new technologies
+- `--embed-libs` - embed JavaScript libraries (D3.js and tech-radar) in HTML instead of loading from CDN
 - `--version` - print version and exit
+
+**Note about `--embed-libs`**: By default, the generated HTML files load D3.js and Zalando Tech Radar libraries from CDN (Content Delivery Network). This keeps the HTML files small (~11KB) but requires internet connection to view them. When you use the `--embed-libs` flag, the libraries (which are bundled with terago at compile time from `pkg/radar/`) are embedded directly into each HTML file (~304KB each). This makes the files self-contained and viewable offline, but significantly increases their size.
+
+Example with embedded libraries:
+
+```bash
+./terago --input ./test/test_input --output ./output --embed-libs
+```
 
 ### Customizing the Radar Template
 
