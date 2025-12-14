@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ekalinin/terago/pkg/core"
 )
@@ -265,16 +266,26 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	file1 := filepath.Join(tempDir, "20231201.html")
 	file2 := filepath.Join(tempDir, "20231202.html")
 
-	if _, err := os.Stat(file1); os.IsNotExist(err) {
-		t.Error("File 20231201.html should have been created")
+	if _, err := os.Stat(file1); err != nil {
+		t.Fatalf("File 20231201.html should have been created: %v", err)
 	}
-	if _, err := os.Stat(file2); os.IsNotExist(err) {
-		t.Error("File 20231202.html should have been created")
+	if _, err := os.Stat(file2); err != nil {
+		if os.IsNotExist(err) {
+			t.Fatalf("File 20231202.html should have been created: %v", err)
+		} else {
+			t.Fatalf("Unexpected error when checking 20231202.html: %v", err)
+		}
 	}
 
 	// Get file modification times
-	info1, _ := os.Stat(file1)
-	info2, _ := os.Stat(file2)
+	info1, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	modTime1 := info1.ModTime()
 	modTime2 := info2.ModTime()
 
@@ -285,8 +296,14 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Check that files were not modified
-	info1After, _ := os.Stat(file1)
-	info2After, _ := os.Stat(file2)
+	info1After, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2After, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	if !info1After.ModTime().Equal(modTime1) {
 		t.Error("File 20231201.html should not have been modified when force=false")
 	}
@@ -295,14 +312,22 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 3: Generate with force (should modify existing files)
+	// Add a small delay to ensure modification time will be different (fails in Github Actions)
+	time.Sleep(1100 * time.Millisecond)
 	err = GenerateRadar(tempDir, "", files, meta, true, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
 
 	// Check that files were modified
-	info1AfterForce, _ := os.Stat(file1)
-	info2AfterForce, _ := os.Stat(file2)
+	info1AfterForce, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2AfterForce, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	if !info1AfterForce.ModTime().After(modTime1) {
 		t.Error("File 20231201.html should have been modified when force=true")
 	}
