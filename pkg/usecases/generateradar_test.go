@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ekalinin/terago/pkg/core"
 )
@@ -311,6 +312,8 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 3: Generate with force (should modify existing files)
+	// Add a small delay to ensure modification time will be different (fails in Github Actions)
+	time.Sleep(1100 * time.Millisecond)
 	err = GenerateRadar(tempDir, "", files, meta, true, false, false, false)
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
