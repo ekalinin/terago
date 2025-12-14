@@ -265,16 +265,22 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	file1 := filepath.Join(tempDir, "20231201.html")
 	file2 := filepath.Join(tempDir, "20231202.html")
 
-	if _, err := os.Stat(file1); os.IsNotExist(err) {
-		t.Error("File 20231201.html should have been created")
+	if _, err := os.Stat(file1); err != nil {
+		t.Fatalf("File 20231201.html should have been created: %v", err)
 	}
-	if _, err := os.Stat(file2); os.IsNotExist(err) {
-		t.Error("File 20231202.html should have been created")
+	if _, err := os.Stat(file2); err != nil {
+		t.Fatalf("File 20231202.html should have been created: %v", err)
 	}
 
 	// Get file modification times
-	info1, _ := os.Stat(file1)
-	info2, _ := os.Stat(file2)
+	info1, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	modTime1 := info1.ModTime()
 	modTime2 := info2.ModTime()
 
