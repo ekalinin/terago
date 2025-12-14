@@ -269,7 +269,11 @@ func TestGenerateRadarWithForce(t *testing.T) {
 		t.Fatalf("File 20231201.html should have been created: %v", err)
 	}
 	if _, err := os.Stat(file2); err != nil {
-		t.Fatalf("File 20231202.html should have been created: %v", err)
+		if os.IsNotExist(err) {
+			t.Fatalf("File 20231202.html should have been created: %v", err)
+		} else {
+			t.Fatalf("Unexpected error when checking 20231202.html: %v", err)
+		}
 	}
 
 	// Get file modification times
