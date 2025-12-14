@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ekalinin/terago/pkg/core"
@@ -19,10 +20,10 @@ func TestReadMeta(t *testing.T) {
 	// Get default meta once
 	defaultMeta := core.DefaultMeta()
 
-	// Test with empty file path - should return defaults
-	meta, err := ReadMeta("")
+	// Test with empty file path and no input dir - should return defaults
+	meta, err := ReadMeta("", "", false)
 	if err != nil {
-		t.Errorf("ReadMeta(\"\") returned error: %v", err)
+		t.Errorf("ReadMeta(\"\", \"\", false) returned error: %v", err)
 	}
 
 	// Check that we got the default values
@@ -43,9 +44,9 @@ func TestReadMeta(t *testing.T) {
 	}
 
 	// Test with non-existent file - should return defaults
-	meta, err = ReadMeta("non-existent-file.yaml")
+	meta, err = ReadMeta("non-existent-file.yaml", "", false)
 	if err != nil {
-		t.Errorf("ReadMeta(\"non-existent-file.yaml\") returned error: %v", err)
+		t.Errorf("ReadMeta(\"non-existent-file.yaml\", \"\", false) returned error: %v", err)
 	}
 
 	// Check that we got the default values
@@ -68,7 +69,7 @@ invalid: yaml: content:
 	}
 	defer os.Remove(invalidYamlFile)
 
-	meta, err = ReadMeta(invalidYamlFile)
+	meta, err = ReadMeta(invalidYamlFile, "", false)
 	if err != nil {
 		t.Errorf("ReadMeta with invalid YAML returned error: %v", err)
 	}
@@ -76,5 +77,42 @@ invalid: yaml: content:
 	// Should still return defaults
 	if meta.Title != defaultMeta.Title {
 		t.Errorf("Expected title %s, got %s", defaultMeta.Title, meta.Title)
+	}
+
+	// Test with empty meta path but valid input dir with meta.yaml
+	tmpDir, err := os.MkdirTemp("", "terago-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	testMetaContent := `
+title: "Test Radar"
+description: "Test Description"
+quadrants:
+  - name: "Languages"
+    alias: "languages"
+rings:
+  - name: "Adopt"
+    alias: "adopt"
+`
+	metaPath := filepath.Join(tmpDir, "meta.yaml")
+	err = os.WriteFile(metaPath, []byte(testMetaContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test meta file: %v", err)
+	}
+
+	meta, err = ReadMeta("", tmpDir, false)
+	if err != nil {
+		t.Errorf("ReadMeta with input dir returned error: %v", err)
+	}
+
+	// Check that we got the values from the file
+	if meta.Title != "Test Radar" {
+		t.Errorf("Expected title 'Test Radar', got %s", meta.Title)
+	}
+
+	if meta.Description != "Test Description" {
+		t.Errorf("Expected description 'Test Description', got %s", meta.Description)
 	}
 }

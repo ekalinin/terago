@@ -5,7 +5,7 @@ DIST_DIR=dist
 TEST_INPUT_DIR=test/test_input
 TEST_OUTPUT_DIR=test/test_output
 TEMPLATE_PATH=pkg/radar/radar.html
-META_PATH=$(TEST_INPUT_DIR)/test_meta.yaml
+META_PATH=$(TEST_INPUT_DIR)/meta.yaml
 
 # Main commands
 .PHONY: all build clean test run-test help
@@ -32,7 +32,7 @@ clean:
 test: build
 	@echo "Running on test data..."
 	@mkdir -p $(TEST_OUTPUT_DIR)
-	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --meta $(META_PATH)
+	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH)
 	@echo "Test completed. Results in directory: $(TEST_OUTPUT_DIR)"
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
 
@@ -40,7 +40,7 @@ test: build
 run:
 	@echo "Running on test data..."
 	@mkdir -p $(TEST_OUTPUT_DIR)
-	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --meta $(META_PATH) --add-changes --force
+	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --add-changes --force
 	@echo "Test completed. Results in directory: $(TEST_OUTPUT_DIR)"
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
 

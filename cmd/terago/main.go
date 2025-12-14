@@ -16,7 +16,7 @@ func main() {
 	outputDir := flag.String("output", "output", "Directory path for HTML output")
 	templatePath := flag.String("template", "", "path to template file (if empty, uses default template)")
 	exportTemplate := flag.String("export-template", "", "Export embedded (default) template to file (for customization)")
-	metaPath := flag.String("meta", "meta.yaml", "path to meta file")
+	metaPath := flag.String("meta", "", "path to meta file (if empty, searches for meta.yaml in input directory)")
 	showVersion := flag.Bool("version", false, "print version")
 	forceRegenerate := flag.Bool("force", false, "force regeneration of all HTML files (ignore existing files)")
 	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
@@ -44,19 +44,17 @@ func main() {
 		log.Println("Start, input=", *inputDir, ", output=", *outputDir, ", template=", *templatePath, ", meta=", *metaPath)
 	}
 
-	// Try to read meta file, use defaults if not available
-	if *verbose {
-		log.Println("Reading meta file: ", *metaPath)
-	}
-	meta, err := usecases.ReadMeta(*metaPath)
-	if err != nil {
-		log.Fatalf("Failed to read meta file: %v", err)
-	}
-
 	// Read input directory (with yaml files)
 	if *inputDir == "" {
 		log.Fatalln("Error: Directory path is required (--input)")
 	}
+
+	// Read meta file
+	meta, err := usecases.ReadMeta(*metaPath, *inputDir, *verbose)
+	if err != nil {
+		log.Fatalf("Failed to read meta file: %v", err)
+	}
+
 	files, err := usecases.ReadTechnologiesFiles(*inputDir, meta)
 	if err != nil {
 		log.Fatalf("Failed to read input directory: %v", err)
