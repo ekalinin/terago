@@ -285,8 +285,14 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Check that files were not modified
-	info1After, _ := os.Stat(file1)
-	info2After, _ := os.Stat(file2)
+	info1After, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2After, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	if !info1After.ModTime().Equal(modTime1) {
 		t.Error("File 20231201.html should not have been modified when force=false")
 	}
@@ -301,8 +307,14 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Check that files were modified
-	info1AfterForce, _ := os.Stat(file1)
-	info2AfterForce, _ := os.Stat(file2)
+	info1AfterForce, err := os.Stat(file1)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file1, err)
+	}
+	info2AfterForce, err := os.Stat(file2)
+	if err != nil {
+		t.Fatalf("Failed to stat %s: %v", file2, err)
+	}
 	if !info1AfterForce.ModTime().After(modTime1) {
 		t.Error("File 20231201.html should have been modified when force=true")
 	}
