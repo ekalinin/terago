@@ -148,8 +148,16 @@
         }
     </style>
 
+    {{if .D3JS}}
+    <script>{{.D3JS}}</script>
+    {{else}}
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    {{end}}
+    {{if .RadarJS}}
+    <script>{{.RadarJS}}</script>
+    {{else}}
     <script src="https://zalando.github.io/tech-radar/release/radar-0.12.js"></script>
+    {{end}}
 
     <!-- Modal for technology description -->
     <div id="descriptionModal" class="modal">

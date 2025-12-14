@@ -22,6 +22,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
 	includeLinks := flag.Bool("include-links", false, "include links in radar entries (based on quadrant and technology name)")
 	addChanges := flag.Bool("add-changes", false, "add table with description of changed or new technologies")
+	embedLibs := flag.Bool("embed-libs", false, "embed JavaScript libraries in HTML instead of loading from CDN")
 
 	flag.Parse()
 
@@ -61,7 +62,7 @@ func main() {
 	}
 
 	// Generate radar (html files)
-	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose, *includeLinks, *addChanges); err != nil {
+	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose, *includeLinks, *addChanges, *embedLibs); err != nil {
 		log.Fatalf("Failed to generate radar: %v", err)
 	}
 

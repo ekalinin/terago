@@ -162,7 +162,8 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 // GenerateRadar generates Radar (HTML file).
 // If includeLinks is true, each radar entry will have a link based on its quadrant and name.
 // If addChanges is true, a table with changed or new technologies will be included.
-func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks, addChanges bool) error {
+// If embedLibs is true, JavaScript libraries will be embedded in HTML instead of loading from CDN.
+func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks, addChanges, embedLibs bool) error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -223,6 +224,11 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		}
 		// Set description JavaScript
 		data.SetDescriptionJS(radar.DescriptionJS)
+
+		// Set embedded libraries if embedLibs is true
+		if embedLibs {
+			data.SetEmbeddedLibs(radar.D3JS, radar.RadarJS)
+		}
 
 		// Build and set changes table if addChanges is true
 		if addChanges {

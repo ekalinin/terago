@@ -31,8 +31,11 @@ type RadarData struct {
 	EntriesJSON   template.JS
 	QuadrantsJSON template.JS
 	RingsJSON     template.JS
-	DescriptionJS template.JS // JavaScript for description modal
+	DescriptionJS template.JS   // JavaScript for description modal
 	ChangesTable  template.HTML // HTML table with changes
+	// Embedded JavaScript libraries (empty if using CDN)
+	D3JS    template.JS
+	RadarJS template.JS
 }
 
 // UpdateJSON updates all JSON fields in the RadarData struct
@@ -105,4 +108,10 @@ func (rd *RadarData) SetDescriptionJS(js string) {
 // SetChangesTable sets the HTML table with changes
 func (rd *RadarData) SetChangesTable(html string) {
 	rd.ChangesTable = template.HTML(html)
+}
+
+// SetEmbeddedLibs sets the embedded JavaScript libraries
+func (rd *RadarData) SetEmbeddedLibs(d3JS, radarJS string) {
+	rd.D3JS = template.JS(d3JS)
+	rd.RadarJS = template.JS(radarJS)
 }
