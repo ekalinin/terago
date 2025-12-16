@@ -34,9 +34,11 @@ visualizing technologies by categories and adoption status.
 
 ## Installation
 
-To install TeraGo, you need Go 1.20 or higher.
+TeraGo can be installed from pre-built binaries or built from source.
 
 ### From Source
+
+To build TeraGo from source, you need Go 1.20 or higher.
 
 ```bash
 # Clone the repository
