@@ -24,6 +24,18 @@ func main() {
 	addChanges := flag.Bool("add-changes", false, "add table with description of changed or new technologies")
 	embedLibs := flag.Bool("embed-libs", false, "embed JavaScript libraries in HTML instead of loading from CDN")
 
+	// Custom help message with version
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "terago version %s\n\n", core.Version)
+		fmt.Fprintf(os.Stderr, "Technology Radar Generator - generates interactive HTML radar visualizations from YAML files\n\n")
+		fmt.Fprintf(os.Stderr, "Usage:\n")
+		fmt.Fprintf(os.Stderr, "  %s -input <directory> [options]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Example:\n")
+		fmt.Fprintf(os.Stderr, "  %s -input ./data -output ./public -meta ./data/meta.yaml\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	// Export template if requested
