@@ -159,14 +159,27 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 	return html
 }
 
-// GenerateRadar generates Radar (HTML file).
-// If includeLinks is true, each radar entry will have a link based on its quadrant and name.
-// If addChanges is true, a table with changed or new technologies will be included.
-// If embedLibs is true, JavaScript libraries will be embedded in HTML instead of loading from CDN.
-func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile, meta core.Meta, force, verbose, includeLinks, addChanges, embedLibs bool) error {
+// GenerateRadar represents the radar generation use case with all its parameters.
+type GenerateRadar struct {
+	OutputDir    string
+	TemplatePath string
+	Files        []core.TechnologiesFile
+	Meta         core.Meta
+	Force        bool
+	Verbose      bool
+	IncludeLinks bool
+	AddChanges   bool
+	EmbedLibs    bool
+}
+
+// Do executes the radar generation.
+// If IncludeLinks is true, each radar entry will have a link based on its quadrant and name.
+// If AddChanges is true, a table with changed or new technologies will be included.
+// If EmbedLibs is true, JavaScript libraries will be embedded in HTML instead of loading from CDN.
+func (g *GenerateRadar) Do() error {
 	// Create output directory if it doesn't exist
-	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(outputDir, 0755); err != nil {
+	if _, err := os.Stat(g.OutputDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(g.OutputDir, 0755); err != nil {
 			return err
 		}
 	}
@@ -174,12 +187,12 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 	// read template file
 	var templateContent []byte
 	var err error
-	if templatePath == "" {
+	if g.TemplatePath == "" {
 		// Use embedded template
 		templateContent = []byte(radar.HTML)
 	} else {
 		// Read template file from disk
-		templateContent, err = os.ReadFile(templatePath)
+		templateContent, err = os.ReadFile(g.TemplatePath)
 		if err != nil {
 			return err
 		}
@@ -192,13 +205,13 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 	}
 
 	// Process each file and generate HTML only if it doesn't exist or force is true
-	for _, file := range files {
+	for _, file := range g.Files {
 		// Check if HTML file already exists
-		outputFile := filepath.Join(outputDir, file.Date+".html")
-		if !force {
+		outputFile := filepath.Join(g.OutputDir, file.Date+".html")
+		if !g.Force {
 			if _, err := os.Stat(outputFile); err == nil {
 				// File exists and force is false, skip generation
-				if verbose {
+				if g.Verbose {
 					log.Printf("Skipping %s.html (already exists, use --force to regenerate)", file.Date)
 				}
 				continue
@@ -206,18 +219,18 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		}
 
 		// Convert technologies to radar entries
-		entries := convertTechnologiesToEntries(file.Technologies, meta, includeLinks)
+		entries := convertTechnologiesToEntries(file.Technologies, g.Meta, g.IncludeLinks)
 
 		// Prepare data for template
 		formattedDate := formatDate(file.Date)
 		data := core.RadarData{
-			Title:       meta.Title,
+			Title:       g.Meta.Title,
 			Date:        formattedDate,
 			Version:     core.Version,
 			GeneratedAt: time.Now().Format("2006-01-02 15:04:05"),
 			Entries:     entries,
-			Quadrants:   meta.Quadrants,
-			Rings:       meta.Rings,
+			Quadrants:   g.Meta.Quadrants,
+			Rings:       g.Meta.Rings,
 		}
 		if err := data.UpdateJSON(); err != nil {
 			return err
@@ -225,14 +238,14 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 		// Set description JavaScript
 		data.SetDescriptionJS(radar.DescriptionJS)
 
-		// Set embedded libraries if embedLibs is true
-		if embedLibs {
+		// Set embedded libraries if EmbedLibs is true
+		if g.EmbedLibs {
 			data.SetEmbeddedLibs(radar.D3JS, radar.RadarJS)
 		}
 
-		// Build and set changes table if addChanges is true
-		if addChanges {
-			changesHTML := buildChangesTable(file.Technologies, meta)
+		// Build and set changes table if AddChanges is true
+		if g.AddChanges {
+			changesHTML := buildChangesTable(file.Technologies, g.Meta)
 			data.SetChangesTable(changesHTML)
 		}
 
@@ -248,7 +261,7 @@ func GenerateRadar(outputDir, templatePath string, files []core.TechnologiesFile
 			return err
 		}
 
-		if verbose {
+		if g.Verbose {
 			log.Printf("Generated %s.html", file.Date)
 		}
 	}

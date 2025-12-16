@@ -62,7 +62,18 @@ func main() {
 	}
 
 	// Generate radar (html files)
-	if err := usecases.GenerateRadar(*outputDir, *templatePath, files, meta, *forceRegenerate, *verbose, *includeLinks, *addChanges, *embedLibs); err != nil {
+	generator := usecases.GenerateRadar{
+		OutputDir:    *outputDir,
+		TemplatePath: *templatePath,
+		Files:        files,
+		Meta:         meta,
+		Force:        *forceRegenerate,
+		Verbose:      *verbose,
+		IncludeLinks: *includeLinks,
+		AddChanges:   *addChanges,
+		EmbedLibs:    *embedLibs,
+	}
+	if err := generator.Do(); err != nil {
 		log.Fatalf("Failed to generate radar: %v", err)
 	}
 

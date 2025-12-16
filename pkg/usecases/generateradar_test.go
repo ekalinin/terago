@@ -257,7 +257,18 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	}
 
 	// Test 1: Generate without force (should create files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false, false)
+	generator := GenerateRadar{
+		OutputDir:    tempDir,
+		TemplatePath: "",
+		Files:        files,
+		Meta:         meta,
+		Force:        false,
+		Verbose:      false,
+		IncludeLinks: false,
+		AddChanges:   false,
+		EmbedLibs:    false,
+	}
+	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -290,7 +301,18 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	modTime2 := info2.ModTime()
 
 	// Test 2: Generate without force again (should not modify existing files)
-	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false, false)
+	generator = GenerateRadar{
+		OutputDir:    tempDir,
+		TemplatePath: "",
+		Files:        files,
+		Meta:         meta,
+		Force:        false,
+		Verbose:      false,
+		IncludeLinks: false,
+		AddChanges:   false,
+		EmbedLibs:    false,
+	}
+	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -314,7 +336,18 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	// Test 3: Generate with force (should modify existing files)
 	// Add a small delay to ensure modification time will be different (fails in Github Actions)
 	time.Sleep(1100 * time.Millisecond)
-	err = GenerateRadar(tempDir, "", files, meta, true, false, false, false, false)
+	generator = GenerateRadar{
+		OutputDir:    tempDir,
+		TemplatePath: "",
+		Files:        files,
+		Meta:         meta,
+		Force:        true,
+		Verbose:      false,
+		IncludeLinks: false,
+		AddChanges:   false,
+		EmbedLibs:    false,
+	}
+	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -369,7 +402,18 @@ func TestGenerateRadarWithChanges(t *testing.T) {
 	}
 
 	// Test 1: Generate with addChanges=false (should not include changes table)
-	err = GenerateRadar(tempDir, "", files, meta, false, false, false, false, false)
+	generator := GenerateRadar{
+		OutputDir:    tempDir,
+		TemplatePath: "",
+		Files:        files,
+		Meta:         meta,
+		Force:        false,
+		Verbose:      false,
+		IncludeLinks: false,
+		AddChanges:   false,
+		EmbedLibs:    false,
+	}
+	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
@@ -387,7 +431,18 @@ func TestGenerateRadarWithChanges(t *testing.T) {
 	}
 
 	// Test 2: Generate with addChanges=true (should include changes table)
-	err = GenerateRadar(tempDir, "", files, meta, true, false, false, true, false)
+	generator = GenerateRadar{
+		OutputDir:    tempDir,
+		TemplatePath: "",
+		Files:        files,
+		Meta:         meta,
+		Force:        true,
+		Verbose:      false,
+		IncludeLinks: false,
+		AddChanges:   true,
+		EmbedLibs:    false,
+	}
+	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
