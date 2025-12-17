@@ -44,7 +44,7 @@ clean:
 test: build
 	@echo "Running on test data..."
 	@mkdir -p $(TEST_OUTPUT_DIR)
-	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH)
+	./$(BUILD_DIR)/$(BINARY_NAME) generate --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH)
 	@echo "Test completed. Results in directory: $(TEST_OUTPUT_DIR)"
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
 
@@ -52,9 +52,14 @@ test: build
 run:
 	@echo "Running on test data..."
 	@mkdir -p $(TEST_OUTPUT_DIR)
-	./$(BUILD_DIR)/$(BINARY_NAME) --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --add-changes --force
+	./$(BUILD_DIR)/$(BINARY_NAME) generate --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR) --template $(TEMPLATE_PATH) --add-changes --force
 	@echo "Test completed. Results in directory: $(TEST_OUTPUT_DIR)"
 	@echo "Open result: open $(TEST_OUTPUT_DIR)/*.html"
+
+# List radars
+list: build
+	@echo "Listing radars..."
+	./$(BUILD_DIR)/$(BINARY_NAME) list --input $(TEST_INPUT_DIR) --output $(TEST_OUTPUT_DIR)
 
 # Install dependencies
 deps:
