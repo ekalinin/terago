@@ -102,8 +102,22 @@ You can combine both flags:
 - `--verbose` - enable verbose logging (show file processing details)
 - `--include-links` - include links in radar entries (based on quadrant and technology name)
 - `--add-changes` - add table with description of changed or new technologies
+- `--skip-first-radar-changes` - skip changes table for the first (earliest) radar (default: true)
 - `--embed-libs` - embed JavaScript libraries (D3.js and tech-radar) in HTML instead of loading from CDN
 - `--version` - print version and exit
+
+**Note about `--add-changes` and `--skip-first-radar-changes`**: When using the `--add-changes` flag, a table showing new and moved technologies is added to each radar. By default, this table is skipped for the first (earliest) radar because all technologies would be marked as "NEW" in the initial radar. You can control this behavior with the `--skip-first-radar-changes` flag:
+
+```bash
+# Default behavior: changes table shown for all radars except the first one
+./terago --input ./test/test_input --output ./output --add-changes
+
+# Explicitly skip changes table for the first radar
+./terago --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=true
+
+# Show changes table for ALL radars, including the first one
+./terago --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=false
+```
 
 **Note about `--embed-libs`**: By default, the generated HTML files load D3.js and Zalando Tech Radar libraries from CDN (Content Delivery Network). This keeps the HTML files small (~11KB) but requires internet connection to view them. When you use the `--embed-libs` flag, the libraries (which are bundled with terago at compile time from `pkg/radar/`) are embedded directly into each HTML file (~304KB each). This makes the files self-contained and viewable offline, but significantly increases their size.
 

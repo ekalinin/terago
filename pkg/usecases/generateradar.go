@@ -161,26 +161,38 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 
 // GenerateRadar represents the radar generation use case with all its parameters.
 type GenerateRadar struct {
-	OutputDir    string
-	TemplatePath string
-	Files        []core.TechnologiesFile
-	Meta         core.Meta
-	Force        bool
-	Verbose      bool
-	IncludeLinks bool
-	AddChanges   bool
-	EmbedLibs    bool
+	OutputDir             string
+	TemplatePath          string
+	Files                 []core.TechnologiesFile
+	Meta                  core.Meta
+	Force                 bool
+	Verbose               bool
+	IncludeLinks          bool
+	AddChanges            bool
+	SkipFirstRadarChanges bool
+	EmbedLibs             bool
 }
 
 // Do executes the radar generation.
 // If IncludeLinks is true, each radar entry will have a link based on its quadrant and name.
 // If AddChanges is true, a table with changed or new technologies will be included.
+// If SkipFirstRadarChanges is true, the changes table will be skipped for the first (earliest) radar.
 // If EmbedLibs is true, JavaScript libraries will be embedded in HTML instead of loading from CDN.
 func (g *GenerateRadar) Do() error {
 	// Create output directory if it doesn't exist
 	if _, err := os.Stat(g.OutputDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(g.OutputDir, 0755); err != nil {
 			return err
+		}
+	}
+
+	// Find the earliest date (first radar) if SkipFirstRadarChanges is enabled
+	firstRadarDate := ""
+	if g.SkipFirstRadarChanges {
+		for _, file := range g.Files {
+			if firstRadarDate == "" || file.Date < firstRadarDate {
+				firstRadarDate = file.Date
+			}
 		}
 	}
 
@@ -244,7 +256,9 @@ func (g *GenerateRadar) Do() error {
 		}
 
 		// Build and set changes table if AddChanges is true
-		if g.AddChanges {
+		// Skip changes table for the first radar (earliest date) if SkipFirstRadarChanges is enabled
+		shouldAddChanges := g.AddChanges && (!g.SkipFirstRadarChanges || file.Date != firstRadarDate)
+		if shouldAddChanges {
 			changesHTML := buildChangesTable(file.Technologies, g.Meta)
 			data.SetChangesTable(changesHTML)
 		}

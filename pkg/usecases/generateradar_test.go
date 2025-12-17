@@ -258,15 +258,16 @@ func TestGenerateRadarWithForce(t *testing.T) {
 
 	// Test 1: Generate without force (should create files)
 	generator := GenerateRadar{
-		OutputDir:    tempDir,
-		TemplatePath: "",
-		Files:        files,
-		Meta:         meta,
-		Force:        false,
-		Verbose:      false,
-		IncludeLinks: false,
-		AddChanges:   false,
-		EmbedLibs:    false,
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 false,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            false,
+		SkipFirstRadarChanges: false,
+		EmbedLibs:             false,
 	}
 	err = generator.Do()
 	if err != nil {
@@ -302,15 +303,16 @@ func TestGenerateRadarWithForce(t *testing.T) {
 
 	// Test 2: Generate without force again (should not modify existing files)
 	generator = GenerateRadar{
-		OutputDir:    tempDir,
-		TemplatePath: "",
-		Files:        files,
-		Meta:         meta,
-		Force:        false,
-		Verbose:      false,
-		IncludeLinks: false,
-		AddChanges:   false,
-		EmbedLibs:    false,
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 false,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            false,
+		SkipFirstRadarChanges: false,
+		EmbedLibs:             false,
 	}
 	err = generator.Do()
 	if err != nil {
@@ -337,15 +339,16 @@ func TestGenerateRadarWithForce(t *testing.T) {
 	// Add a small delay to ensure modification time will be different (fails in Github Actions)
 	time.Sleep(1100 * time.Millisecond)
 	generator = GenerateRadar{
-		OutputDir:    tempDir,
-		TemplatePath: "",
-		Files:        files,
-		Meta:         meta,
-		Force:        true,
-		Verbose:      false,
-		IncludeLinks: false,
-		AddChanges:   false,
-		EmbedLibs:    false,
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 true,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            false,
+		SkipFirstRadarChanges: false,
+		EmbedLibs:             false,
 	}
 	err = generator.Do()
 	if err != nil {
@@ -395,6 +398,12 @@ func TestGenerateRadarWithChanges(t *testing.T) {
 		{
 			Date: "20231201",
 			Technologies: []core.Technology{
+				{Name: "Python", Ring: "Adopt", Quadrant: "Languages", Description: "Base technology"},
+			},
+		},
+		{
+			Date: "20231202",
+			Technologies: []core.Technology{
 				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Fast and efficient", IsNew: true},
 				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "UI library", IsMoved: true, PreviousRing: "Assess"},
 			},
@@ -403,75 +412,123 @@ func TestGenerateRadarWithChanges(t *testing.T) {
 
 	// Test 1: Generate with addChanges=false (should not include changes table)
 	generator := GenerateRadar{
-		OutputDir:    tempDir,
-		TemplatePath: "",
-		Files:        files,
-		Meta:         meta,
-		Force:        false,
-		Verbose:      false,
-		IncludeLinks: false,
-		AddChanges:   false,
-		EmbedLibs:    false,
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 false,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            false,
+		SkipFirstRadarChanges: false,
+		EmbedLibs:             false,
 	}
 	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
 
-	// Read the generated file
-	outputFile := filepath.Join(tempDir, "20231201.html")
-	content, err := os.ReadFile(outputFile)
+	// Read the generated file for first radar
+	outputFile1 := filepath.Join(tempDir, "20231201.html")
+	content1, err := os.ReadFile(outputFile1)
 	if err != nil {
 		t.Fatalf("Failed to read output file: %v", err)
 	}
 
 	// Should not contain changes table
-	if strings.Contains(string(content), "Changes in this Radar") {
+	if strings.Contains(string(content1), "Changes in this Radar") {
 		t.Error("Output should not contain changes table when addChanges=false")
 	}
 
-	// Test 2: Generate with addChanges=true (should include changes table)
+	// Test 2: Generate with addChanges=true and SkipFirstRadarChanges=true
+	// First radar (earliest date) should NOT have changes table
+	// Second radar should have changes table
 	generator = GenerateRadar{
-		OutputDir:    tempDir,
-		TemplatePath: "",
-		Files:        files,
-		Meta:         meta,
-		Force:        true,
-		Verbose:      false,
-		IncludeLinks: false,
-		AddChanges:   true,
-		EmbedLibs:    false,
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 true,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            true,
+		SkipFirstRadarChanges: true,
+		EmbedLibs:             false,
 	}
 	err = generator.Do()
 	if err != nil {
 		t.Fatalf("GenerateRadar failed: %v", err)
 	}
 
-	// Read the generated file
-	content, err = os.ReadFile(outputFile)
+	// Read the first radar file
+	content1, err = os.ReadFile(outputFile1)
 	if err != nil {
-		t.Fatalf("Failed to read output file: %v", err)
+		t.Fatalf("Failed to read first output file: %v", err)
 	}
 
-	// Should contain changes table
-	contentStr := string(content)
-	if !strings.Contains(contentStr, "changes-section") {
+	// First radar should NOT contain changes table (even with addChanges=true)
+	content1Str := string(content1)
+	if strings.Contains(content1Str, "Changes in this Radar") {
+		t.Error("First radar should not contain changes table")
+	}
+
+	// Read the second radar file
+	outputFile2 := filepath.Join(tempDir, "20231202.html")
+	content2, err := os.ReadFile(outputFile2)
+	if err != nil {
+		t.Fatalf("Failed to read second output file: %v", err)
+	}
+
+	// Second radar should contain changes table
+	content2Str := string(content2)
+	if !strings.Contains(content2Str, "changes-section") {
 		t.Error("Output should contain changes section when addChanges=true")
 	}
-	if !strings.Contains(contentStr, "Changes in this Radar") {
+	if !strings.Contains(content2Str, "Changes in this Radar") {
 		t.Error("Output should contain changes title")
 	}
-	if !strings.Contains(contentStr, "Go") {
+	if !strings.Contains(content2Str, "Go") {
 		t.Error("Output should contain Go technology")
 	}
-	if !strings.Contains(contentStr, "React") {
+	if !strings.Contains(content2Str, "React") {
 		t.Error("Output should contain React technology")
 	}
-	if !strings.Contains(contentStr, "NEW") {
+	if !strings.Contains(content2Str, "NEW") {
 		t.Error("Output should contain NEW status for Go")
 	}
-	if !strings.Contains(contentStr, "MOVED") {
+	if !strings.Contains(content2Str, "MOVED") {
 		t.Error("Output should contain MOVED status for React")
+	}
+
+	// Test 3: Generate with addChanges=true and SkipFirstRadarChanges=false
+	// Both radars should have changes table
+	generator = GenerateRadar{
+		OutputDir:             tempDir,
+		TemplatePath:          "",
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 true,
+		Verbose:               false,
+		IncludeLinks:          false,
+		AddChanges:            true,
+		SkipFirstRadarChanges: false,
+		EmbedLibs:             false,
+	}
+	err = generator.Do()
+	if err != nil {
+		t.Fatalf("GenerateRadar failed: %v", err)
+	}
+
+	// Read the first radar file
+	content1, err = os.ReadFile(outputFile1)
+	if err != nil {
+		t.Fatalf("Failed to read first output file: %v", err)
+	}
+
+	// First radar should contain changes table when SkipFirstRadarChanges=false
+	content1Str = string(content1)
+	if !strings.Contains(content1Str, "changes-section") {
+		t.Error("First radar should contain changes section when SkipFirstRadarChanges=false")
 	}
 }
 

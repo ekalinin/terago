@@ -22,6 +22,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
 	includeLinks := flag.Bool("include-links", false, "include links in radar entries (based on quadrant and technology name)")
 	addChanges := flag.Bool("add-changes", false, "add table with description of changed or new technologies")
+	skipFirstRadarChanges := flag.Bool("skip-first-radar-changes", true, "skip changes table for the first (earliest) radar (default: true)")
 	embedLibs := flag.Bool("embed-libs", false, "embed JavaScript libraries in HTML instead of loading from CDN")
 
 	// Custom help message with version
@@ -75,15 +76,16 @@ func main() {
 
 	// Generate radar (html files)
 	generator := usecases.GenerateRadar{
-		OutputDir:    *outputDir,
-		TemplatePath: *templatePath,
-		Files:        files,
-		Meta:         meta,
-		Force:        *forceRegenerate,
-		Verbose:      *verbose,
-		IncludeLinks: *includeLinks,
-		AddChanges:   *addChanges,
-		EmbedLibs:    *embedLibs,
+		OutputDir:             *outputDir,
+		TemplatePath:          *templatePath,
+		Files:                 files,
+		Meta:                  meta,
+		Force:                 *forceRegenerate,
+		Verbose:               *verbose,
+		IncludeLinks:          *includeLinks,
+		AddChanges:            *addChanges,
+		SkipFirstRadarChanges: *skipFirstRadarChanges,
+		EmbedLibs:             *embedLibs,
 	}
 	if err := generator.Do(); err != nil {
 		log.Fatalf("Failed to generate radar: %v", err)
