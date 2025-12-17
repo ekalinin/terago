@@ -84,27 +84,18 @@ func TestHelpFlag(t *testing.T) {
 		t.Errorf("Help output should contain Usage section, got: %s", stderr)
 	}
 
-	// Check that help output contains example
-	if !strings.Contains(stderr, "Example:") {
-		t.Errorf("Help output should contain Example section, got: %s", stderr)
+	// Check that help output contains available commands
+	if !strings.Contains(stderr, "Available Commands:") {
+		t.Errorf("Help output should contain Available Commands section, got: %s", stderr)
 	}
 
-	if !strings.Contains(stderr, "-input ./data -output ./public") {
-		t.Errorf("Help output should contain example command, got: %s", stderr)
+	// Check that commands are listed
+	if !strings.Contains(stderr, "generate") {
+		t.Errorf("Help output should contain generate command, got: %s", stderr)
 	}
 
-	// Check that help output contains options
-	if !strings.Contains(stderr, "Options:") {
-		t.Errorf("Help output should contain Options section, got: %s", stderr)
-	}
-
-	// Check that some flags are listed
-	if !strings.Contains(stderr, "-input") {
-		t.Errorf("Help output should contain -input flag, got: %s", stderr)
-	}
-
-	if !strings.Contains(stderr, "-output") {
-		t.Errorf("Help output should contain -output flag, got: %s", stderr)
+	if !strings.Contains(stderr, "list") {
+		t.Errorf("Help output should contain list command, got: %s", stderr)
 	}
 }
 
@@ -113,7 +104,7 @@ func TestExportTemplate(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "template.html")
 
-	stdout, stderr, exitCode := runCommand(t, binary, "-export-template", templatePath)
+	stdout, stderr, exitCode := runCommand(t, binary, "generate", "-export-template", templatePath)
 
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0, got %d", exitCode)
@@ -135,7 +126,7 @@ func TestExportTemplate(t *testing.T) {
 func TestMissingInputDirectory(t *testing.T) {
 	binary := buildBinary(t)
 
-	_, stderr, exitCode := runCommand(t, binary)
+	_, stderr, exitCode := runCommand(t, binary, "generate")
 
 	if exitCode == 0 {
 		t.Error("Expected non-zero exit code when input directory is missing")
@@ -158,7 +149,7 @@ func TestWithTestData(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, stderr, exitCode := runCommand(t, binary,
+	_, stderr, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-verbose")
@@ -201,7 +192,7 @@ func TestVerboseFlag(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, stderr, exitCode := runCommand(t, binary,
+	_, stderr, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-verbose")
@@ -231,7 +222,7 @@ func TestForceFlag(t *testing.T) {
 	tmpOutputDir := t.TempDir()
 
 	// First run
-	_, _, exitCode := runCommand(t, binary,
+	_, _, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir)
 
@@ -240,7 +231,7 @@ func TestForceFlag(t *testing.T) {
 	}
 
 	// Second run with -force flag
-	_, _, exitCode = runCommand(t, binary,
+	_, _, exitCode = runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-force")
@@ -260,7 +251,7 @@ func TestEmbedLibsFlag(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, _, exitCode := runCommand(t, binary,
+	_, _, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-embed-libs")
@@ -305,7 +296,7 @@ func TestIncludeLinksFlag(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, _, exitCode := runCommand(t, binary,
+	_, _, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-include-links")
@@ -335,7 +326,7 @@ func TestAddChangesFlag(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, _, exitCode := runCommand(t, binary,
+	_, _, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-add-changes")
@@ -367,14 +358,14 @@ func TestCustomTemplateFlag(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "custom_template.html")
 
-	_, _, exitCode := runCommand(t, binary, "-export-template", templatePath)
+	_, _, exitCode := runCommand(t, binary, "generate", "-export-template", templatePath)
 	if exitCode != 0 {
 		t.Fatalf("Failed to export template, exit code: %d", exitCode)
 	}
 
 	// Now use the custom template
 	tmpOutputDir := t.TempDir()
-	_, _, exitCode = runCommand(t, binary,
+	_, _, exitCode = runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-template", templatePath)
@@ -410,7 +401,7 @@ func TestCustomMetaFlag(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, _, exitCode := runCommand(t, binary,
+	_, _, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-meta", testMetaPath)
@@ -440,7 +431,7 @@ func TestMultipleFlags(t *testing.T) {
 
 	tmpOutputDir := t.TempDir()
 
-	_, stderr, exitCode := runCommand(t, binary,
+	_, stderr, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-verbose",
@@ -480,7 +471,7 @@ func TestInvalidMetaPath(t *testing.T) {
 	invalidMetaPath := "/non/existent/meta.yaml"
 	tmpOutputDir := t.TempDir()
 
-	_, stderr, exitCode := runCommand(t, binary,
+	_, stderr, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-meta", invalidMetaPath)
@@ -505,7 +496,7 @@ func TestInvalidTemplatePath(t *testing.T) {
 	invalidTemplatePath := "/non/existent/template.html"
 	tmpOutputDir := t.TempDir()
 
-	_, stderr, exitCode := runCommand(t, binary,
+	_, stderr, exitCode := runCommand(t, binary, "generate",
 		"-input", testInputDir,
 		"-output", tmpOutputDir,
 		"-template", invalidTemplatePath)
