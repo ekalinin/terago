@@ -123,17 +123,18 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 	// Build HTML table
 	html := `
 	<div class="changes-section">
-		<h3>Changes in this Radar</h3>
-		<table class="changes-table">
-			<thead>
-				<tr>
-					<th>Technology</th>
-					<th>Quadrant</th>
-					<th>Status</th>
-					<th>Description</th>
-				</tr>
-			</thead>
-			<tbody>`
+		<details>
+			<summary>Changes in this Radar</summary>
+			<table class="changes-table">
+				<thead>
+					<tr>
+						<th>Technology</th>
+						<th>Quadrant</th>
+						<th>Status</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>`
 
 	for _, tech := range changedTechs {
 		status := ""
@@ -154,6 +155,7 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 	html += `
 			</tbody>
 		</table>
+		</details>
 	</div>`
 
 	return html

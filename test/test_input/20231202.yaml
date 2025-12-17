@@ -8,7 +8,7 @@ technologies:
     quadrant: "Frameworks"
     description: "Library for creating user interfaces"
   - name: "Docker"
-    ring: "Hold"
+    ring: "Adopt"
     quadrant: "Infrastructure"
     description: "Platform for containerizing applications"
   - name: "Colima"
