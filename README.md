@@ -9,8 +9,9 @@
   - [From Source](#from-source)
   - [From GitHub Releases](#from-github-releases)
 - [Usage](#usage)
-  - [Basic Usage](#basic-usage)
-  - [Command Line Parameters](#command-line-parameters)
+  - [Available Commands](#available-commands)
+  - [Generate Command](#generate-command)
+  - [List Command](#list-command)
   - [Customizing the Radar Template](#customizing-the-radar-template)
   - [Input Data Format](#input-data-format)
     - [Metadata File (meta.yaml)](#metadata-file-metayaml)
@@ -60,10 +61,36 @@ You can download the latest pre-built binary from [GitHub Releases][download-url
 
 ## Usage
 
-### Basic Usage
+### Available Commands
+
+TeraGo uses a command-based interface. Each command has its own set of options:
 
 ```bash
-./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml
+terago <command> [options]
+```
+
+**Available commands:**
+- `generate` (or `g`) - Generate HTML radars from YAML files
+- `list` (or `l`) - List available radars and their render status
+- `version` (or `v`) - Show version information
+- `help` (or `h`) - Show help message
+
+You can use full command names or short aliases (shown in parentheses) for convenience.
+
+### Generate Command
+
+Generate HTML technology radars from YAML files.
+
+**Basic usage:**
+
+```bash
+./terago generate --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml
+```
+
+Or using the short alias:
+
+```bash
+./terago g --input ./test/test_input --output ./output
 ```
 
 The `--meta` parameter is optional. If not specified, default values will be
@@ -76,22 +103,22 @@ override these default values.
 **Force Regeneration**: To regenerate all HTML files (useful when updating templates or metadata), use the `--force` flag:
 
 ```bash
-./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --force
+./terago generate --input ./test/test_input --output ./output --force
 ```
 
 **Verbose Logging**: To see detailed information about file processing (which files are being generated or skipped), use the `--verbose` flag:
 
 ```bash
-./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --verbose
+./terago generate --input ./test/test_input --output ./output --verbose
 ```
 
 You can combine both flags:
 
 ```bash
-./terago --input ./test/test_input --output ./output --meta ./test/test_input/test_meta.yaml --force --verbose
+./terago generate --input ./test/test_input --output ./output --force --verbose
 ```
 
-### Command Line Parameters
+#### Generate Command Options
 
 - `--input` - path to directory with technology YAML files (required)
 - `--output` - path to directory for saving HTML files (default: "output")
@@ -104,19 +131,54 @@ You can combine both flags:
 - `--add-changes` - add table with description of changed or new technologies
 - `--skip-first-radar-changes` - skip changes table for the first (earliest) radar (default: true)
 - `--embed-libs` - embed JavaScript libraries (D3.js and tech-radar) in HTML instead of loading from CDN
-- `--version` - print version and exit
+
+### List Command
+
+List all available radar files in the input directory and check their render status.
+
+**Basic usage:**
+
+```bash
+./terago list --input ./test/test_input --output ./output
+```
+
+Or using the short alias:
+
+```bash
+./terago l --input ./test/test_input
+```
+
+**Example output:**
+
+```
+Found 2 radar(s) in test/test_input:
+
+  20231201 ✓ (rendered: 2025-12-17 18:36:01)
+  20231202 ✓ (rendered: 2025-12-17 18:36:05)
+  20231203 ✗ (not rendered)
+```
+
+The command shows:
+- Total number of radar files found
+- Each radar file with its date (YYYYMMDD format)
+- Render status: ✓ (rendered with timestamp) or ✗ (not rendered)
+
+#### List Command Options
+
+- `--input` - path to directory with technology YAML files (required)
+- `--output` - path to directory for HTML output (default: "output")
 
 **Note about `--add-changes` and `--skip-first-radar-changes`**: When using the `--add-changes` flag, a table showing new and moved technologies is added to each radar. By default, this table is skipped for the first (earliest) radar because all technologies would be marked as "NEW" in the initial radar. You can control this behavior with the `--skip-first-radar-changes` flag:
 
 ```bash
 # Default behavior: changes table shown for all radars except the first one
-./terago --input ./test/test_input --output ./output --add-changes
+./terago generate --input ./test/test_input --output ./output --add-changes
 
 # Explicitly skip changes table for the first radar
-./terago --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=true
+./terago generate --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=true
 
 # Show changes table for ALL radars, including the first one
-./terago --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=false
+./terago generate --input ./test/test_input --output ./output --add-changes --skip-first-radar-changes=false
 ```
 
 **Note about `--embed-libs`**: By default, the generated HTML files load D3.js and Zalando Tech Radar libraries from CDN (Content Delivery Network). This keeps the HTML files small (~11KB) but requires internet connection to view them. When you use the `--embed-libs` flag, the libraries (which are bundled with terago at compile time from `pkg/radar/`) are embedded directly into each HTML file (~304KB each). This makes the files self-contained and viewable offline, but significantly increases their size.
@@ -124,7 +186,7 @@ You can combine both flags:
 Example with embedded libraries:
 
 ```bash
-./terago --input ./test/test_input --output ./output --embed-libs
+./terago generate --input ./test/test_input --output ./output --embed-libs
 ```
 
 ### Customizing the Radar Template
@@ -133,14 +195,14 @@ TeraGo uses an embedded HTML template for radar visualization. If you want to cu
 the appearance of your radar, you can export this template and modify it:
 
 ```bash
-./terago --export-template ./my-template.html
+./terago generate --export-template ./my-template.html
 ```
 
 This will create a file `my-template.html` with the default template content.
 You can then modify this file according to your needs and use it with the `--template` parameter:
 
 ```bash
-./terago --input ./test/test_input --output ./output --template ./my-template.html
+./terago generate --input ./test/test_input --output ./output --template ./my-template.html
 ```
 
 The template uses Go's [text/template](https://pkg.go.dev/text/template) package
@@ -253,7 +315,8 @@ technologies:
 terago/
 ├── cmd/
 │   └── terago/
-│       └── main.go          # Application entry point
+│       ├── main.go          # Application entry point
+│       └── list.go          # List command implementation
 ├── pkg/
 │   ├── core/                # Core data structures
 │   ├── radar/               # Embedded HTML template
@@ -279,3 +342,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 [test-url]: https://github.com/ekalinin/terago/actions/workflows/test.yml
 [download-badge]: https://img.shields.io/github/v/release/ekalinin/terago
 [download-url]: https://github.com/ekalinin/terago/releases/latest
+

@@ -11,33 +11,69 @@ import (
 )
 
 func main() {
-	// Parse command-line arguments
-	inputDir := flag.String("input", "", "Directory path containing YAML files")
-	outputDir := flag.String("output", "output", "Directory path for HTML output")
-	templatePath := flag.String("template", "", "path to template file (if empty, uses default template)")
-	exportTemplate := flag.String("export-template", "", "Export embedded (default) template to file (for customization)")
-	metaPath := flag.String("meta", "", "path to meta file (if empty, searches for meta.yaml in input directory)")
-	showVersion := flag.Bool("version", false, "print version")
-	forceRegenerate := flag.Bool("force", false, "force regeneration of all HTML files (ignore existing files)")
-	verbose := flag.Bool("verbose", false, "enable verbose logging (show file processing details)")
-	includeLinks := flag.Bool("include-links", false, "include links in radar entries (based on quadrant and technology name)")
-	addChanges := flag.Bool("add-changes", false, "add table with description of changed or new technologies")
-	skipFirstRadarChanges := flag.Bool("skip-first-radar-changes", true, "skip changes table for the first (earliest) radar (default: true)")
-	embedLibs := flag.Bool("embed-libs", false, "embed JavaScript libraries in HTML instead of loading from CDN")
-
-	// Custom help message with version
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "terago version %s\n\n", core.Version)
-		fmt.Fprintf(os.Stderr, "Technology Radar Generator - generates interactive HTML radar visualizations from YAML files\n\n")
-		fmt.Fprintf(os.Stderr, "Usage:\n")
-		fmt.Fprintf(os.Stderr, "  %s -input <directory> [options]\n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Example:\n")
-		fmt.Fprintf(os.Stderr, "  %s -input ./data -output ./public -meta ./data/meta.yaml\n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Options:\n")
-		flag.PrintDefaults()
+	if len(os.Args) < 2 {
+		printMainUsage()
+		os.Exit(1)
 	}
 
-	flag.Parse()
+	command := os.Args[1]
+
+	switch command {
+	case "generate", "g":
+		generateCommand(os.Args[2:])
+	case "list", "l":
+		listCommand(os.Args[2:])
+	case "version", "v", "-version", "--version":
+		fmt.Println(core.Version)
+		os.Exit(0)
+	case "help", "h", "-help", "--help", "-h":
+		printMainUsage()
+		os.Exit(0)
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", command)
+		printMainUsage()
+		os.Exit(1)
+	}
+}
+
+func printMainUsage() {
+	fmt.Fprintf(os.Stderr, "terago version %s\n\n", core.Version)
+	fmt.Fprintf(os.Stderr, "Technology Radar Generator - generates interactive HTML radar visualizations from YAML files\n\n")
+	fmt.Fprintf(os.Stderr, "Usage:\n")
+	fmt.Fprintf(os.Stderr, "  terago <command> [options]\n\n")
+	fmt.Fprintf(os.Stderr, "Available Commands:\n")
+	fmt.Fprintf(os.Stderr, "  generate, g    Generate HTML radars from YAML files\n")
+	fmt.Fprintf(os.Stderr, "  list, l        List available radars and their render status\n")
+	fmt.Fprintf(os.Stderr, "  version, v     Show version information\n")
+	fmt.Fprintf(os.Stderr, "  help, h        Show this help message\n\n")
+	fmt.Fprintf(os.Stderr, "Use \"terago <command> -h\" for more information about a command.\n")
+}
+
+func generateCommand(args []string) {
+	fs := flag.NewFlagSet("generate", flag.ExitOnError)
+
+	inputDir := fs.String("input", "", "Directory path containing YAML files")
+	outputDir := fs.String("output", "output", "Directory path for HTML output")
+	templatePath := fs.String("template", "", "path to template file (if empty, uses default template)")
+	exportTemplate := fs.String("export-template", "", "Export embedded (default) template to file (for customization)")
+	metaPath := fs.String("meta", "", "path to meta file (if empty, searches for meta.yaml in input directory)")
+	forceRegenerate := fs.Bool("force", false, "force regeneration of all HTML files (ignore existing files)")
+	verbose := fs.Bool("verbose", false, "enable verbose logging (show file processing details)")
+	includeLinks := fs.Bool("include-links", false, "include links in radar entries (based on quadrant and technology name)")
+	addChanges := fs.Bool("add-changes", false, "add table with description of changed or new technologies")
+	skipFirstRadarChanges := fs.Bool("skip-first-radar-changes", true, "skip changes table for the first (earliest) radar (default: true)")
+	embedLibs := fs.Bool("embed-libs", false, "embed JavaScript libraries in HTML instead of loading from CDN")
+
+	fs.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage:\n")
+		fmt.Fprintf(os.Stderr, "  terago generate -input <directory> [options]\n\n")
+		fmt.Fprintf(os.Stderr, "Example:\n")
+		fmt.Fprintf(os.Stderr, "  terago generate -input ./data -output ./public -meta ./data/meta.yaml\n\n")
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		fs.PrintDefaults()
+	}
+
+	fs.Parse(args)
 
 	// Export template if requested
 	if *exportTemplate != "" {
@@ -45,12 +81,6 @@ func main() {
 			log.Fatalf("Failed to export template: %v", err)
 		}
 		log.Printf("Template exported to %s\n", *exportTemplate)
-		os.Exit(0)
-	}
-
-	// Print version if requested
-	if *showVersion {
-		fmt.Println(core.Version)
 		os.Exit(0)
 	}
 
