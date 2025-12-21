@@ -201,7 +201,26 @@
 
     <svg id="radar"></svg>
 
-    {{.ChangesTable}}
+    {{if .ChangesTable}}
+    <div class="changes-section">
+        <details>
+            <summary>Changes in this Radar</summary>
+            <table class="changes-table">
+                <thead>
+                    <tr>
+                        <th>Technology</th>
+                        <th>Quadrant</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{.ChangesTable}}
+                </tbody>
+            </table>
+        </details>
+    </div>
+    {{end}}
 
     <script>
         // Radar data in JSON format

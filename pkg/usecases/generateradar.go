@@ -104,7 +104,8 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 	return entries
 }
 
-// buildChangesTable creates an HTML table with changed or new technologies
+// buildChangesTable creates HTML rows for changed or new technologies
+// Returns only tbody content (without table structure and headers)
 func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 	var changedTechs []core.Technology
 
@@ -120,21 +121,8 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 		return ""
 	}
 
-	// Build HTML table
-	html := `
-	<div class="changes-section">
-		<details>
-			<summary>Changes in this Radar</summary>
-			<table class="changes-table">
-				<thead>
-					<tr>
-						<th>Technology</th>
-						<th>Quadrant</th>
-						<th>Status</th>
-						<th>Description</th>
-					</tr>
-				</thead>
-				<tbody>`
+	// Build HTML rows only
+	var html strings.Builder
 
 	for _, tech := range changedTechs {
 		status := ""
@@ -144,21 +132,15 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 			status = "MOVED: " + tech.PreviousRing + " → " + tech.Ring
 		}
 
-		html += "\n\t\t\t\t<tr>"
-		html += "\n\t\t\t\t\t<td><strong>" + tech.Name + "</strong></td>"
-		html += "\n\t\t\t\t\t<td>" + tech.Quadrant + "</td>"
-		html += "\n\t\t\t\t\t<td class=\"status-" + strings.ToLower(tech.Ring) + "\">" + status + "</td>"
-		html += "\n\t\t\t\t\t<td>" + tech.Description + "</td>"
-		html += "\n\t\t\t\t</tr>"
+		html.WriteString("\n\t\t\t\t\t<tr>")
+		html.WriteString("\n\t\t\t\t\t\t<td><strong>" + tech.Name + "</strong></td>")
+		html.WriteString("\n\t\t\t\t\t\t<td>" + tech.Quadrant + "</td>")
+		html.WriteString("\n\t\t\t\t\t\t<td class=\"status-" + strings.ToLower(tech.Ring) + "\">" + status + "</td>")
+		html.WriteString("\n\t\t\t\t\t\t<td>" + tech.Description + "</td>")
+		html.WriteString("\n\t\t\t\t\t</tr>")
 	}
 
-	html += `
-			</tbody>
-		</table>
-		</details>
-	</div>`
-
-	return html
+	return html.String()
 }
 
 // GenerateRadar represents the radar generation use case with all its parameters.
