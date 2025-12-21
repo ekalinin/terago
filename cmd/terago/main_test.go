@@ -104,7 +104,7 @@ func TestExportTemplate(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "template.html")
 
-	stdout, stderr, exitCode := runCommand(t, binary, "generate", "-export-template", templatePath)
+	stdout, stderr, exitCode := runCommand(t, binary, "export-template", "-output", templatePath)
 
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0, got %d", exitCode)
@@ -358,7 +358,7 @@ func TestCustomTemplateFlag(t *testing.T) {
 	tmpDir := t.TempDir()
 	templatePath := filepath.Join(tmpDir, "custom_template.html")
 
-	_, _, exitCode := runCommand(t, binary, "generate", "-export-template", templatePath)
+	_, _, exitCode := runCommand(t, binary, "export-template", "-output", templatePath)
 	if exitCode != 0 {
 		t.Fatalf("Failed to export template, exit code: %d", exitCode)
 	}

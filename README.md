@@ -12,6 +12,7 @@
   - [Available Commands](#available-commands)
   - [Generate Command](#generate-command)
   - [List Command](#list-command)
+  - [Export Template Command](#export-template-command)
   - [Customizing the Radar Template](#customizing-the-radar-template)
   - [Input Data Format](#input-data-format)
     - [Metadata File (meta.yaml)](#metadata-file-metayaml)
@@ -71,6 +72,7 @@ terago <command> [options]
 
 **Available commands:**
 - `generate` (or `g`) - Generate HTML radars from YAML files
+- `export-template` (or `e`) - Export embedded template to file for customization
 - `list` (or `l`) - List available radars and their render status
 - `version` (or `v`) - Show version information
 - `help` (or `h`) - Show help message
@@ -123,7 +125,6 @@ You can combine both flags:
 - `--input` - path to directory with technology YAML files (required)
 - `--output` - path to directory for saving HTML files (default: "output")
 - `--template` - path to HTML template (if empty, uses default embedded template)
-- `--export-template` - export embedded (default) template to file for customization
 - `--meta` - path to metadata file (default: "meta.yaml")
 - `--force` - force regeneration of all HTML files (ignore existing files)
 - `--verbose` - enable verbose logging (show file processing details)
@@ -189,13 +190,36 @@ Example with embedded libraries:
 ./terago generate --input ./test/test_input --output ./output --embed-libs
 ```
 
-### Customizing the Radar Template
+### Export Template Command
 
-TeraGo uses an embedded HTML template for radar visualization. If you want to customize
-the appearance of your radar, you can export this template and modify it:
+Export the embedded HTML template to a file for customization.
+
+**Basic usage:**
 
 ```bash
-./terago generate --export-template ./my-template.html
+./terago export-template --output ./my-template.html
+```
+
+Or using the short alias:
+
+```bash
+./terago e --output ./my-template.html
+```
+
+This command exports the default embedded template that TeraGo uses for generating radar visualizations. Once exported, you can modify the template to customize the appearance of your radars.
+
+#### Export Template Command Options
+
+- `--output` - output file path for the template (required)
+
+### Customizing the Radar Template
+
+TeraGo uses an embedded HTML template for radar visualization. To customize
+the appearance of your radar, first export the template using the `export-template` command
+(see [Export Template Command](#export-template-command) section above):
+
+```bash
+./terago export-template --output ./my-template.html
 ```
 
 This will create a file `my-template.html` with the default template content.
