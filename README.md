@@ -275,6 +275,11 @@ The `.RingsJSON` contains an array of rings with the following structure:
 ```yaml
 title: "Technology Radar"
 description: "Radar description"
+# Optional: custom file name pattern (regex) for technology files
+# Default pattern is ^\d{8}\.yaml$ (YYYYMMDD.yaml)
+# You can override it to use custom naming convention:
+# fileNamePattern: "^radar-\\d{4}-\\d{2}-\\d{2}\\.yaml$"  # radar-YYYY-MM-DD.yaml
+# fileNamePattern: "^tech-\\d{8}\\.yaml$"                 # tech-YYYYMMDD.yaml
 quadrants:
   - name: "Languages"
     alias: "languages"
@@ -294,6 +299,14 @@ rings:
   - name: "Hold"
     alias: "hold"
 ```
+
+**Custom File Name Pattern**: By default, TeraGo looks for technology files with names in `YYYYMMDD.yaml` format (e.g., `20231201.yaml`). You can customize this behavior by specifying a `fileNamePattern` in your `meta.yaml` file using regular expression syntax. This allows you to use alternative naming conventions for your technology files, such as:
+
+- `radar-2023-12-01.yaml` with pattern `^radar-\d{4}-\d{2}-\d{2}\.yaml$`
+- `tech-20231201.yaml` with pattern `^tech-\d{8}\.yaml$`
+- Any other pattern that matches your naming convention
+
+Note: The file name (without the `.yaml` extension) will be used as the date identifier for the radar.
 
 #### Technology Files (YYYYMMDD.yaml)
 

@@ -22,8 +22,8 @@ func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.Technologies
 		return technologiesFiles, fmt.Errorf("error reading directory: %v", err)
 	}
 
-	// Filter files by YYYYMMDD.yaml pattern
-	datePattern := regexp.MustCompile(`^(\d{8})\.yaml$`)
+	// Get file name pattern from meta or use default YYYYMMDD.yaml pattern
+	datePattern := regexp.MustCompile(meta.FileNamePattern)
 	var validFiles []string
 	for _, file := range files {
 		baseName := filepath.Base(file)
@@ -45,7 +45,7 @@ func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.Technologies
 		fileName := filepath.Base(file)
 		// fmt.Printf("Processing file: %s\n", fileName)
 
-		// Extract date from filename (YYYYMMDD)
+		// Extract date from filename (without .yaml extension)
 		dateStr := strings.TrimSuffix(fileName, ".yaml")
 
 		// Parse YAML file

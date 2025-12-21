@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/ekalinin/terago/pkg/usecases"
 )
 
 func listCommand(args []string) {
@@ -32,14 +34,17 @@ func listCommand(args []string) {
 		log.Fatalln("Error: Directory path is required (--input)")
 	}
 
+	// Read meta configuration to get file pattern
+	meta, _ := usecases.ReadMeta("", *inputDir, false)
+
 	// Get all YAML files in the input directory
 	files, err := filepath.Glob(filepath.Join(*inputDir, "*.yaml"))
 	if err != nil {
 		log.Fatalf("Failed to read input directory: %v", err)
 	}
 
-	// Filter files by YYYYMMDD.yaml pattern
-	datePattern := regexp.MustCompile(`^(\d{8})\.yaml$`)
+	// Filter files by pattern from meta
+	datePattern := regexp.MustCompile(meta.FileNamePattern)
 	var validFiles []string
 	for _, file := range files {
 		baseName := filepath.Base(file)

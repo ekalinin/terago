@@ -14,27 +14,30 @@ type Ring struct {
 
 // MetaFile represents the metadata of the radar file.
 type MetaFile struct {
-	Title       string     `yaml:"title"`
-	Description string     `yaml:"description"`
-	Quadrants   []Quadrant `yaml:"quadrants"`
-	Rings       []Ring     `yaml:"rings"`
+	Title           string     `yaml:"title"`
+	Description     string     `yaml:"description"`
+	Quadrants       []Quadrant `yaml:"quadrants"`
+	Rings           []Ring     `yaml:"rings"`
+	FileNamePattern string     `yaml:"fileNamePattern"`
 }
 
 // Meta represents the metadata of the radar data used in main logic.
 type Meta struct {
-	Title       string      `yaml:"title"`
-	Description string      `yaml:"description"`
-	Quadrants   []Quadrant  `yaml:"quadrants"`
-	Rings       []Ring      `yaml:"rings"`
-	ringSet     Set[string] `yaml:"-"`
-	quadrantSet Set[string] `yaml:"-"`
+	Title           string      `yaml:"title"`
+	Description     string      `yaml:"description"`
+	Quadrants       []Quadrant  `yaml:"quadrants"`
+	Rings           []Ring      `yaml:"rings"`
+	FileNamePattern string      `yaml:"fileNamePattern"`
+	ringSet         Set[string] `yaml:"-"`
+	quadrantSet     Set[string] `yaml:"-"`
 }
 
 var defaultMeta = Meta{
-	Title:       "My Radar",
-	Description: "Technology Radar",
-	Quadrants:   DefaultQuadrants,
-	Rings:       DefaultRings,
+	Title:           "My Radar",
+	Description:     "Technology Radar",
+	Quadrants:       DefaultQuadrants,
+	Rings:           DefaultRings,
+	FileNamePattern: `^\d{8}\.yaml$`, // default YYYYMMDD.yaml pattern
 }
 
 // NewMeta creates a new Meta with initialized ringSet and quadrantSet
@@ -61,12 +64,19 @@ func NewMeta(title, description string, quadrants []Quadrant, rings []Ring) Meta
 
 // NewMetaFromFile creates a new Meta from a MetaFile
 func NewMetaFromFile(metaFile MetaFile) Meta {
-	return NewMeta(
+	m := NewMeta(
 		metaFile.Title,
 		metaFile.Description,
 		metaFile.Quadrants,
 		metaFile.Rings,
 	)
+
+	// Override FileNamePattern if provided
+	if metaFile.FileNamePattern != "" {
+		m.FileNamePattern = metaFile.FileNamePattern
+	}
+
+	return m
 }
 
 // PopulateSets fills the ringSet and quadrantSet with values from Rings and Quadrants

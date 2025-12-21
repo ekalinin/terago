@@ -64,7 +64,8 @@ func getMovedValue(tech core.Technology, rings []core.Ring) int {
 	return MovedValueUnchanged // No movement
 }
 
-// formatDate converts date from YYYYMMDD format to YYYY-MM-DD format
+// formatDate converts date from YYYYMMDD format to YYYY-MM-DD format.
+// If the string length is not 8, returns it as is (e.g., for custom date formats).
 func formatDate(dateStr string) string {
 	if len(dateStr) != 8 {
 		return dateStr // Return as is if not in expected format

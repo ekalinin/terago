@@ -510,3 +510,111 @@ func TestInvalidTemplatePath(t *testing.T) {
 	}
 }
 
+func TestListWithCustomPattern(t *testing.T) {
+	binary := buildBinary(t)
+
+	// Create temporary directory
+	tmpDir := t.TempDir()
+	tmpInputDir := filepath.Join(tmpDir, "input")
+	tmpOutputDir := filepath.Join(tmpDir, "output")
+
+	// Create input and output directories
+	if err := os.MkdirAll(tmpInputDir, 0755); err != nil {
+		t.Fatalf("Failed to create input directory: %v", err)
+	}
+	if err := os.MkdirAll(tmpOutputDir, 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
+
+	// Create meta.yaml with custom pattern
+	metaContent := `title: "Test Radar"
+description: "Test with custom pattern"
+fileNamePattern: "^radar-\\d{4}-\\d{2}-\\d{2}\\.yaml$"
+quadrants:
+  - name: "Languages"
+    alias: "languages"
+rings:
+  - name: "Adopt"
+    alias: "adopt"
+`
+	metaPath := filepath.Join(tmpInputDir, "meta.yaml")
+	if err := os.WriteFile(metaPath, []byte(metaContent), 0644); err != nil {
+		t.Fatalf("Failed to write meta.yaml: %v", err)
+	}
+
+	// Create test technology files with custom pattern
+	techContent1 := `technologies:
+  - name: "Go"
+    ring: "Adopt"
+    quadrant: "Languages"
+    description: "Programming language"
+`
+	techPath1 := filepath.Join(tmpInputDir, "radar-2023-12-01.yaml")
+	if err := os.WriteFile(techPath1, []byte(techContent1), 0644); err != nil {
+		t.Fatalf("Failed to write technology file 1: %v", err)
+	}
+
+	techPath2 := filepath.Join(tmpInputDir, "radar-2023-12-15.yaml")
+	if err := os.WriteFile(techPath2, []byte(techContent1), 0644); err != nil {
+		t.Fatalf("Failed to write technology file 2: %v", err)
+	}
+
+	// Test list command without generation (should show "not rendered")
+	stdout, _, exitCode := runCommand(t, binary, "list",
+		"-input", tmpInputDir,
+		"-output", tmpOutputDir)
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code 0, got %d", exitCode)
+	}
+
+	if !strings.Contains(stdout, "Found 2 radar(s)") {
+		t.Errorf("Expected to find 2 radars, got: %s", stdout)
+	}
+
+	if !strings.Contains(stdout, "radar-2023-12-01") {
+		t.Errorf("Expected to find radar-2023-12-01 in output, got: %s", stdout)
+	}
+
+	if !strings.Contains(stdout, "radar-2023-12-15") {
+		t.Errorf("Expected to find radar-2023-12-15 in output, got: %s", stdout)
+	}
+
+	if !strings.Contains(stdout, "not rendered") {
+		t.Errorf("Expected to find 'not rendered' in output, got: %s", stdout)
+	}
+
+	// Generate HTML files
+	_, _, exitCode = runCommand(t, binary, "generate",
+		"-input", tmpInputDir,
+		"-output", tmpOutputDir)
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code 0, got %d", exitCode)
+	}
+
+	// Test list command after generation (should show "rendered")
+	stdout, _, exitCode = runCommand(t, binary, "list",
+		"-input", tmpInputDir,
+		"-output", tmpOutputDir)
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code 0, got %d", exitCode)
+	}
+
+	if !strings.Contains(stdout, "rendered:") {
+		t.Errorf("Expected to find 'rendered:' in output, got: %s", stdout)
+	}
+
+	// Check that HTML files were generated
+	htmlFile1 := filepath.Join(tmpOutputDir, "radar-2023-12-01.html")
+	if _, err := os.Stat(htmlFile1); os.IsNotExist(err) {
+		t.Error("Expected HTML file radar-2023-12-01.html to be generated")
+	}
+
+	htmlFile2 := filepath.Join(tmpOutputDir, "radar-2023-12-15.html")
+	if _, err := os.Stat(htmlFile2); os.IsNotExist(err) {
+		t.Error("Expected HTML file radar-2023-12-15.html to be generated")
+	}
+}
+

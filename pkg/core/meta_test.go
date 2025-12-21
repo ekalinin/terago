@@ -212,3 +212,55 @@ func TestNewMeta(t *testing.T) {
 		t.Error("Expected quadrantSet to contain custom quadrant 'Tools' and 'tools'")
 	}
 }
+
+func TestNewMetaFromFile(t *testing.T) {
+	// Test with default FileNamePattern
+	metaFile1 := MetaFile{
+		Title:       "Test Radar",
+		Description: "Test Description",
+		Quadrants: []Quadrant{
+			{Name: "Languages", Alias: "languages"},
+		},
+		Rings: []Ring{
+			{Name: "Adopt", Alias: "adopt"},
+		},
+	}
+
+	meta1 := NewMetaFromFile(metaFile1)
+
+	// Check that default FileNamePattern is set
+	expectedDefaultPattern := `^\d{8}\.yaml$`
+	if meta1.FileNamePattern != expectedDefaultPattern {
+		t.Errorf("Expected default FileNamePattern '%s', got '%s'", expectedDefaultPattern, meta1.FileNamePattern)
+	}
+
+	// Test with custom FileNamePattern
+	customPattern := `^radar-\d{4}-\d{2}-\d{2}\.yaml$`
+	metaFile2 := MetaFile{
+		Title:           "Test Radar",
+		Description:     "Test Description",
+		FileNamePattern: customPattern,
+		Quadrants: []Quadrant{
+			{Name: "Languages", Alias: "languages"},
+		},
+		Rings: []Ring{
+			{Name: "Adopt", Alias: "adopt"},
+		},
+	}
+
+	meta2 := NewMetaFromFile(metaFile2)
+
+	// Check that custom FileNamePattern is set
+	if meta2.FileNamePattern != customPattern {
+		t.Errorf("Expected custom FileNamePattern '%s', got '%s'", customPattern, meta2.FileNamePattern)
+	}
+
+	// Verify other fields are properly set
+	if meta2.Title != metaFile2.Title {
+		t.Errorf("Expected title '%s', got '%s'", metaFile2.Title, meta2.Title)
+	}
+
+	if meta2.Description != metaFile2.Description {
+		t.Errorf("Expected description '%s', got '%s'", metaFile2.Description, meta2.Description)
+	}
+}

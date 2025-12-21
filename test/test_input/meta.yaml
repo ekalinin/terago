@@ -1,5 +1,8 @@
 title: "Test technical radar"
 description: "Example technical radar for demonstration"
+# Optional: custom file name pattern (regex) for technology files
+# Default pattern is ^\d{8}\.yaml$ (YYYYMMDD.yaml)
+# fileNamePattern: "^\\d{8}\\.yaml$"
 quadrants:
   - name: "Languages"
     alias: "languages"
