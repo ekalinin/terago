@@ -12,14 +12,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ReadTechnologiesFiles reads all Technologies files in the specified directory.
-func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.TechnologiesFile, error) {
-	var technologiesFiles []core.TechnologiesFile
-
+// GetRadarFiles returns a sorted list of YAML files that match the pattern from meta.
+func GetRadarFiles(inputDir string, meta core.Meta) ([]string, error) {
 	// Get all YAML files in the directory
 	files, err := filepath.Glob(filepath.Join(inputDir, "*.yaml"))
 	if err != nil {
-		return technologiesFiles, fmt.Errorf("error reading directory: %v", err)
+		return nil, fmt.Errorf("error reading directory: %v", err)
 	}
 
 	// Get file name pattern from meta or use default YYYYMMDD.yaml pattern
@@ -38,6 +36,19 @@ func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.Technologies
 		fileNameJ := filepath.Base(validFiles[j])
 		return strings.Compare(fileNameI, fileNameJ) < 0
 	})
+
+	return validFiles, nil
+}
+
+// ReadTechnologiesFiles reads all Technologies files in the specified directory.
+func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.TechnologiesFile, error) {
+	var technologiesFiles []core.TechnologiesFile
+
+	// Get all valid YAML files
+	validFiles, err := GetRadarFiles(inputDir, meta)
+	if err != nil {
+		return technologiesFiles, err
+	}
 
 	// Process each file in order
 	var previousTechnologies []core.Technology

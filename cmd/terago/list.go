@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/ekalinin/terago/pkg/usecases"
@@ -37,33 +35,16 @@ func listCommand(args []string) {
 	// Read meta configuration to get file pattern
 	meta, _ := usecases.ReadMeta("", *inputDir, false)
 
-	// Get all YAML files in the input directory
-	files, err := filepath.Glob(filepath.Join(*inputDir, "*.yaml"))
+	// Get all valid YAML files
+	validFiles, err := usecases.GetRadarFiles(*inputDir, meta)
 	if err != nil {
 		log.Fatalf("Failed to read input directory: %v", err)
-	}
-
-	// Filter files by pattern from meta
-	datePattern := regexp.MustCompile(meta.FileNamePattern)
-	var validFiles []string
-	for _, file := range files {
-		baseName := filepath.Base(file)
-		if datePattern.MatchString(baseName) {
-			validFiles = append(validFiles, file)
-		}
 	}
 
 	if len(validFiles) == 0 {
 		fmt.Println("No radar files found in", *inputDir)
 		return
 	}
-
-	// Sort files by date (filename)
-	sort.Slice(validFiles, func(i, j int) bool {
-		fileNameI := filepath.Base(validFiles[i])
-		fileNameJ := filepath.Base(validFiles[j])
-		return strings.Compare(fileNameI, fileNameJ) < 0
-	})
 
 	fmt.Printf("Found %d radar(s) in %s:\n\n", len(validFiles), *inputDir)
 

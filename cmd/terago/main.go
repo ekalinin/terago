@@ -22,6 +22,8 @@ func main() {
 		exportTemplateCommand(os.Args[2:])
 	case "list", "l":
 		listCommand(os.Args[2:])
+	case "validate", "val":
+		validateCommand(os.Args[2:])
 	case "version", "v", "-version", "--version":
 		fmt.Println(core.Version)
 		os.Exit(0)
@@ -44,6 +46,7 @@ func printMainUsage() {
 	fmt.Fprintf(os.Stderr, "  generate, g         Generate HTML radars from YAML files\n")
 	fmt.Fprintf(os.Stderr, "  export-template, e  Export embedded template to file for customization\n")
 	fmt.Fprintf(os.Stderr, "  list, l             List available radars and their render status\n")
+	fmt.Fprintf(os.Stderr, "  validate, val       Validate YAML files structure and data\n")
 	fmt.Fprintf(os.Stderr, "  version, v          Show version information\n")
 	fmt.Fprintf(os.Stderr, "  help, h             Show this help message\n\n")
 	fmt.Fprintf(os.Stderr, "Use \"terago <command> -h\" for more information about a command.\n")
