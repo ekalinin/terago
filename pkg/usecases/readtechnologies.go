@@ -88,6 +88,7 @@ func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.Technologies
 	return technologiesFiles, nil
 }
 
+// readTechnologiesFile reads and validates a single technologies YAML file.
 func readTechnologiesFile(filePath string, meta core.Meta) (core.TechnologiesFile, error) {
 	var technologiesFile core.TechnologiesFile
 
