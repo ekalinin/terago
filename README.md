@@ -12,6 +12,7 @@
   - [Available Commands](#available-commands)
   - [Generate Command](#generate-command)
   - [List Command](#list-command)
+  - [Validate Command](#validate-command)
   - [Export Template Command](#export-template-command)
   - [Customizing the Radar Template](#customizing-the-radar-template)
   - [Input Data Format](#input-data-format)
@@ -74,6 +75,7 @@ terago <command> [options]
 - `generate` (or `g`) - Generate HTML radars from YAML files
 - `export-template` (or `e`) - Export embedded template to file for customization
 - `list` (or `l`) - List available radars and their render status
+- `validate` (or `val`) - Validate YAML files structure and data
 - `version` (or `v`) - Show version information
 - `help` (or `h`) - Show help message
 
@@ -168,6 +170,66 @@ The command shows:
 
 - `--input` - path to directory with technology YAML files (required)
 - `--output` - path to directory for HTML output (default: "output")
+
+### Validate Command
+
+Validate YAML files structure and data before generating radars. This command checks:
+- YAML syntax correctness
+- Presence of required fields (name, ring, quadrant, description)
+- Validity of ring and quadrant values according to metadata
+- Non-empty technologies list
+
+**Basic usage:**
+
+```bash
+./terago validate --input ./test/test_input
+```
+
+Or using the short alias:
+
+```bash
+./terago val --input ./test/test_input
+```
+
+**Example output (normal mode):**
+
+```
+OK: 2 file(s) processed
+```
+
+**Example output (verbose mode):**
+
+```bash
+./terago validate --input ./test/test_input --verbose
+```
+
+```
+OK: 20231201.yaml
+OK: 20231202.yaml
+
+OK: 2 file(s) processed
+```
+
+**Example with errors:**
+
+```
+ERROR: 20231203.yaml - invalid ring 'InvalidRing' in technology 'Python'
+ERROR: 20231204.yaml - technology 'Go' is missing 'description' field
+
+Validation completed with errors: 2 file(s) failed, 1 file(s) passed
+```
+
+#### Validate Command Options
+
+- `--input` - path to directory with technology YAML files (required)
+- `--meta` - path to metadata file (optional, default: searches for meta.yaml in input directory)
+- `--verbose` - verbose output showing status for each file
+
+The validate command is useful for:
+- Checking data before generating radars
+- CI/CD pipeline integration
+- Quick validation of manually edited YAML files
+- Finding errors in technology files
 
 **Note about `--add-changes` and `--skip-first-radar-changes`**: When using the `--add-changes` flag, a table showing new and moved technologies is added to each radar. By default, this table is skipped for the first (earliest) radar because all technologies would be marked as "NEW" in the initial radar. You can control this behavior with the `--skip-first-radar-changes` flag:
 
