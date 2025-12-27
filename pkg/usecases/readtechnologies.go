@@ -70,7 +70,7 @@ func ReadTechnologiesFiles(inputDir string, meta core.Meta) ([]core.Technologies
 
 		// Compare with previous period to identify changes
 		if previousTechnologies != nil {
-			markChanges(technologiesFile.Technologies, previousTechnologies)
+			markChanges(&technologiesFile.Technologies, previousTechnologies)
 		} else {
 			// If this is the first file, mark all as new
 			for i := range technologiesFile.Technologies {
@@ -111,27 +111,44 @@ func readTechnologiesFile(filePath string, meta core.Meta) (core.TechnologiesFil
 	return technologiesFile, nil
 }
 
-// markChanges compares current technologies with previous ones and marks changes
-func markChanges(current, previous []core.Technology) {
+// markChanges compares current technologies with previous ones and marks changes.
+// It also appends deleted technologies (present in previous but not in current) to the current slice.
+func markChanges(current *[]core.Technology, previous []core.Technology) {
 	// Create a map of previous technologies for quick lookup
 	previousMap := make(map[string]core.Technology)
 	for _, tech := range previous {
 		previousMap[tech.Name] = tech
 	}
 
+	// Create a map of current technologies to track which ones were found
+	currentMap := make(map[string]bool)
+
 	// Check each current technology
-	for i := range current {
-		prevTech, exists := previousMap[current[i].Name]
+	for i, tech := range *current {
+		currentMap[tech.Name] = true
+		prevTech, exists := previousMap[tech.Name]
 		if exists {
 			// Technology existed before, check if ring changed
-			if prevTech.Ring != current[i].Ring {
-				current[i].IsMoved = true
-				current[i].PreviousRing = prevTech.Ring
+			if prevTech.Ring != tech.Ring {
+				(*current)[i].IsMoved = true
+				(*current)[i].PreviousRing = prevTech.Ring
 			}
-			current[i].IsNew = false
+			(*current)[i].IsNew = false
 		} else {
 			// New technology
-			current[i].IsNew = true
+			(*current)[i].IsNew = true
+		}
+	}
+
+	// Find deleted technologies (in previous but not in current)
+	for _, prevTech := range previous {
+		if !currentMap[prevTech.Name] {
+			// This technology was deleted
+			deletedTech := prevTech
+			deletedTech.IsDeleted = true
+			deletedTech.IsNew = false
+			deletedTech.IsMoved = false
+			*current = append(*current, deletedTech)
 		}
 	}
 }

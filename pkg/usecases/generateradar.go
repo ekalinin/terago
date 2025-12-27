@@ -75,10 +75,16 @@ func formatDate(dateStr string) string {
 
 // convertTechnologiesToEntries converts Technology structs to RadarEntry structs
 // If includeLinks is true, Link field will be populated based on technology name and quadrant
+// Deleted technologies (IsDeleted=true) are not converted to entries as they should not appear on the radar
 func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta, includeLinks bool) []core.RadarEntry {
 	var entries []core.RadarEntry
 
 	for _, tech := range technologies {
+		// Skip deleted technologies - they should not appear on the radar
+		if tech.IsDeleted {
+			continue
+		}
+
 		quadrantIndex := getQuadrantIndex(tech.Quadrant, meta.Quadrants)
 		ringIndex := getRingIndex(tech.Ring, meta.Rings)
 		moved := getMovedValue(tech, meta.Rings)
@@ -105,14 +111,14 @@ func convertTechnologiesToEntries(technologies []core.Technology, meta core.Meta
 	return entries
 }
 
-// buildChangesTable creates HTML rows for changed or new technologies
+// buildChangesTable creates HTML rows for changed, new, or deleted technologies
 // Returns only tbody content (without table structure and headers)
 func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 	var changedTechs []core.Technology
 
-	// Filter technologies that are new or moved
+	// Filter technologies that are new, moved, or deleted
 	for _, tech := range technologies {
-		if tech.IsNew || tech.IsMoved {
+		if tech.IsNew || tech.IsMoved || tech.IsDeleted {
 			changedTechs = append(changedTechs, tech)
 		}
 	}
@@ -127,7 +133,9 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 
 	for _, tech := range changedTechs {
 		status := ""
-		if tech.IsNew {
+		if tech.IsDeleted {
+			status = "DELETED from " + tech.Ring
+		} else if tech.IsNew {
 			status = "NEW"
 		} else if tech.IsMoved {
 			status = "MOVED: " + tech.PreviousRing + " → " + tech.Ring
@@ -136,7 +144,13 @@ func buildChangesTable(technologies []core.Technology, meta core.Meta) string {
 		html.WriteString("\n\t\t\t\t\t<tr>")
 		html.WriteString("\n\t\t\t\t\t\t<td><strong>" + tech.Name + "</strong></td>")
 		html.WriteString("\n\t\t\t\t\t\t<td>" + tech.Quadrant + "</td>")
-		html.WriteString("\n\t\t\t\t\t\t<td class=\"status-" + strings.ToLower(tech.Ring) + "\">" + status + "</td>")
+
+		// Use a special CSS class for deleted technologies
+		ringClass := strings.ToLower(tech.Ring)
+		if tech.IsDeleted {
+			ringClass = "deleted"
+		}
+		html.WriteString("\n\t\t\t\t\t\t<td class=\"status-" + ringClass + "\">" + status + "</td>")
 		html.WriteString("\n\t\t\t\t\t\t<td>" + tech.Description + "</td>")
 		html.WriteString("\n\t\t\t\t\t</tr>")
 	}

@@ -1,0 +1,18 @@
+technologies:
+  - name: "Go"
+    ring: "Adopt"
+    quadrant: "Languages"
+    description: "Effective programming language"
+  - name: "Docker"
+    ring: "Adopt"
+    quadrant: "Infrastructure"
+    description: "Platform for containerizing applications"
+  - name: "Colima"
+    ring: "Trial"
+    quadrant: "Infrastructure"
+    description: "Alternative to Docker Desktop for macOS"
+  - name: "Kubernetes"
+    ring: "Trial"
+    quadrant: "Infrastructure"
+    description: "Platform for containerizing applications"
+

@@ -12,6 +12,7 @@ type Technology struct {
 	// Used for tracking changes between periods
 	IsNew        bool   `yaml:"-"`
 	IsMoved      bool   `yaml:"-"`
+	IsDeleted    bool   `yaml:"-"`
 	PreviousRing string `yaml:"-"`
 }
 

@@ -563,6 +563,14 @@ func TestBuildChangesTable(t *testing.T) {
 			wantEmpty:    false,
 		},
 		{
+			name: "with deleted technology",
+			technologies: []core.Technology{
+				{Name: "Angular", Ring: "Trial", Quadrant: "Frameworks", Description: "Deprecated framework", IsDeleted: true},
+			},
+			wantContains: []string{"Angular", "DELETED from Trial", "Deprecated framework", "status-deleted"},
+			wantEmpty:    false,
+		},
+		{
 			name: "with no changes",
 			technologies: []core.Technology{
 				{Name: "Docker", Ring: "Adopt", Quadrant: "Infrastructure", Description: "Container platform", IsNew: false, IsMoved: false},
@@ -571,13 +579,14 @@ func TestBuildChangesTable(t *testing.T) {
 			wantEmpty:    true,
 		},
 		{
-			name: "with mixed technologies",
+			name: "with mixed technologies including deleted",
 			technologies: []core.Technology{
 				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Fast", IsNew: true},
 				{Name: "Docker", Ring: "Adopt", Quadrant: "Infrastructure", Description: "Containers", IsNew: false, IsMoved: false},
 				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "UI", IsMoved: true, PreviousRing: "Assess"},
+				{Name: "Angular", Ring: "Adopt", Quadrant: "Frameworks", Description: "Old framework", IsDeleted: true},
 			},
-			wantContains: []string{"Go", "React", "NEW", "MOVED"},
+			wantContains: []string{"Go", "React", "Angular", "NEW", "MOVED", "DELETED from Adopt"},
 			wantEmpty:    false,
 		},
 	}
@@ -596,6 +605,171 @@ func TestBuildChangesTable(t *testing.T) {
 			for _, want := range tt.wantContains {
 				if !strings.Contains(result, want) {
 					t.Errorf("Expected result to contain %q, but it doesn't. Result: %s", want, result)
+				}
+			}
+		})
+	}
+}
+
+func TestConvertTechnologiesToEntries(t *testing.T) {
+	meta := core.Meta{
+		Quadrants: []core.Quadrant{
+			{Name: "Languages", Alias: "languages"},
+			{Name: "Frameworks", Alias: "frameworks"},
+			{Name: "Infrastructure", Alias: "infrastructure"},
+			{Name: "Techniques", Alias: "techniques"},
+		},
+		Rings: []core.Ring{
+			{Name: "Adopt", Alias: "adopt"},
+			{Name: "Trial", Alias: "trial"},
+			{Name: "Assess", Alias: "assess"},
+			{Name: "Hold", Alias: "hold"},
+		},
+	}
+
+	tests := []struct {
+		name               string
+		technologies       []core.Technology
+		includeLinks       bool
+		expectedCount      int
+		checkFirstEntry    bool
+		expectedQuadrant   int
+		expectedRing       int
+		expectedMoved      int
+		expectedLabel      string
+		expectedLink       string
+		expectedHasDeleted bool
+	}{
+		{
+			name: "Basic conversion without links",
+			technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Go language", IsNew: false, IsMoved: false},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "React library", IsNew: true, IsMoved: false},
+			},
+			includeLinks:     false,
+			expectedCount:    2,
+			checkFirstEntry:  true,
+			expectedQuadrant: 0, // Languages
+			expectedRing:     0, // Adopt
+			expectedMoved:    0, // Unchanged
+			expectedLabel:    "Go",
+			expectedLink:     "",
+		},
+		{
+			name: "Basic conversion with links",
+			technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Go language", IsNew: false, IsMoved: false},
+			},
+			includeLinks:     true,
+			expectedCount:    1,
+			checkFirstEntry:  true,
+			expectedQuadrant: 0,
+			expectedRing:     0,
+			expectedMoved:    0,
+			expectedLabel:    "Go",
+			expectedLink:     "/Languages/Go/",
+		},
+		{
+			name: "New technology conversion",
+			technologies: []core.Technology{
+				{Name: "Kubernetes", Ring: "Trial", Quadrant: "Infrastructure", Description: "K8s", IsNew: true, IsMoved: false},
+			},
+			includeLinks:     false,
+			expectedCount:    1,
+			checkFirstEntry:  true,
+			expectedQuadrant: 2, // Infrastructure
+			expectedRing:     1, // Trial
+			expectedMoved:    2, // New
+			expectedLabel:    "Kubernetes",
+			expectedLink:     "",
+		},
+		{
+			name: "Moved technology conversion",
+			technologies: []core.Technology{
+				{Name: "React", Ring: "Adopt", Quadrant: "Frameworks", Description: "React", IsNew: false, IsMoved: true, PreviousRing: "Trial"},
+			},
+			includeLinks:     false,
+			expectedCount:    1,
+			checkFirstEntry:  true,
+			expectedQuadrant: 1, // Frameworks
+			expectedRing:     0, // Adopt
+			expectedMoved:    1, // Improved (moved to inner ring)
+			expectedLabel:    "React",
+			expectedLink:     "",
+		},
+		{
+			name: "Deleted technology should be skipped",
+			technologies: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Go", IsNew: false, IsMoved: false, IsDeleted: false},
+				{Name: "Angular", Ring: "Hold", Quadrant: "Frameworks", Description: "Old framework", IsNew: false, IsMoved: false, IsDeleted: true},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "React", IsNew: false, IsMoved: false, IsDeleted: false},
+			},
+			includeLinks:       false,
+			expectedCount:      2, // Angular should be skipped
+			checkFirstEntry:    true,
+			expectedQuadrant:   0, // Languages (Go)
+			expectedRing:       0, // Adopt
+			expectedMoved:      0,
+			expectedLabel:      "Go",
+			expectedLink:       "",
+			expectedHasDeleted: false,
+		},
+		{
+			name: "Only deleted technologies",
+			technologies: []core.Technology{
+				{Name: "Angular", Ring: "Hold", Quadrant: "Frameworks", Description: "Old", IsDeleted: true},
+				{Name: "Backbone", Ring: "Hold", Quadrant: "Frameworks", Description: "Ancient", IsDeleted: true},
+			},
+			includeLinks:    false,
+			expectedCount:   0, // All should be skipped
+			checkFirstEntry: false,
+		},
+		{
+			name:            "Empty technologies list",
+			technologies:    []core.Technology{},
+			includeLinks:    false,
+			expectedCount:   0,
+			checkFirstEntry: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := convertTechnologiesToEntries(tt.technologies, meta, tt.includeLinks)
+
+			// Check count
+			if len(result) != tt.expectedCount {
+				t.Errorf("Expected %d entries, got %d", tt.expectedCount, len(result))
+			}
+
+			// Check that no deleted technologies are in result
+			if tt.expectedHasDeleted == false && len(result) > 0 {
+				for _, entry := range result {
+					for _, tech := range tt.technologies {
+						if entry.Label == tech.Name && tech.IsDeleted {
+							t.Errorf("Deleted technology %s should not be in result", tech.Name)
+						}
+					}
+				}
+			}
+
+			// Check first entry details if specified
+			if tt.checkFirstEntry && len(result) > 0 {
+				entry := result[0]
+				if entry.Quadrant != tt.expectedQuadrant {
+					t.Errorf("Expected quadrant %d, got %d", tt.expectedQuadrant, entry.Quadrant)
+				}
+				if entry.Ring != tt.expectedRing {
+					t.Errorf("Expected ring %d, got %d", tt.expectedRing, entry.Ring)
+				}
+				if entry.Moved != tt.expectedMoved {
+					t.Errorf("Expected moved %d, got %d", tt.expectedMoved, entry.Moved)
+				}
+				if entry.Label != tt.expectedLabel {
+					t.Errorf("Expected label %q, got %q", tt.expectedLabel, entry.Label)
+				}
+				if entry.Link != tt.expectedLink {
+					t.Errorf("Expected link %q, got %q", tt.expectedLink, entry.Link)
 				}
 			}
 		})

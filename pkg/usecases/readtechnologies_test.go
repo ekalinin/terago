@@ -199,3 +199,258 @@ func TestReadTechnologiesFilesWithDefaultPattern(t *testing.T) {
 		t.Errorf("Expected 2 files matching default pattern, got %d", len(files))
 	}
 }
+
+func TestMarkChanges(t *testing.T) {
+	tests := []struct {
+		name                 string
+		current              []core.Technology
+		previous             []core.Technology
+		expectedNewCount     int
+		expectedMovedCount   int
+		expectedUnchanged    int
+		expectedDeletedCount int
+		expectedTotalCount   int
+		checkSpecificTech    string
+		expectedIsNew        bool
+		expectedIsMoved      bool
+		expectedIsDeleted    bool
+		expectedPreviousRing string
+	}{
+		{
+			name: "First radar - all technologies are new",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+			},
+			previous:             nil,
+			expectedNewCount:     0, // markChanges is not called for first radar
+			expectedMovedCount:   0,
+			expectedUnchanged:    0,
+			expectedDeletedCount: 0,
+			expectedTotalCount:   2,
+		},
+		{
+			name: "New technology added",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+				{Name: "Docker", Ring: "Adopt", Quadrant: "Tools"},
+			},
+			previous: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+			},
+			expectedNewCount:     1,
+			expectedMovedCount:   0,
+			expectedUnchanged:    2,
+			expectedDeletedCount: 0,
+			expectedTotalCount:   3,
+			checkSpecificTech:    "Docker",
+			expectedIsNew:        true,
+			expectedIsMoved:      false,
+			expectedIsDeleted:    false,
+		},
+		{
+			name: "Technology moved to different ring",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Adopt", Quadrant: "Frameworks"}, // Moved from Trial to Adopt
+			},
+			previous: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+			},
+			expectedNewCount:     0,
+			expectedMovedCount:   1,
+			expectedUnchanged:    1,
+			expectedDeletedCount: 0,
+			expectedTotalCount:   2,
+			checkSpecificTech:    "React",
+			expectedIsNew:        false,
+			expectedIsMoved:      true,
+			expectedIsDeleted:    false,
+			expectedPreviousRing: "Trial",
+		},
+		{
+			name: "Technology deleted",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+			},
+			previous: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+			},
+			expectedNewCount:     0,
+			expectedMovedCount:   0,
+			expectedUnchanged:    1,
+			expectedDeletedCount: 1,
+			expectedTotalCount:   2,
+			checkSpecificTech:    "React",
+			expectedIsNew:        false,
+			expectedIsMoved:      false,
+			expectedIsDeleted:    true,
+			expectedPreviousRing: "",
+		},
+		{
+			name: "Multiple technologies deleted",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+			},
+			previous: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+				{Name: "Angular", Ring: "Hold", Quadrant: "Frameworks"},
+			},
+			expectedNewCount:     0,
+			expectedMovedCount:   0,
+			expectedUnchanged:    1,
+			expectedDeletedCount: 2,
+			expectedTotalCount:   3,
+		},
+		{
+			name: "Complex scenario: new, moved, deleted, and unchanged",
+			current: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},         // Unchanged
+				{Name: "React", Ring: "Adopt", Quadrant: "Frameworks"},     // Moved from Trial
+				{Name: "Kubernetes", Ring: "Trial", Quadrant: "Platforms"}, // New
+			},
+			previous: []core.Technology{
+				{Name: "Go", Ring: "Adopt", Quadrant: "Languages"},
+				{Name: "React", Ring: "Trial", Quadrant: "Frameworks"},
+				{Name: "Docker", Ring: "Adopt", Quadrant: "Tools"},              // Deleted
+				{Name: "Microservices", Ring: "Assess", Quadrant: "Techniques"}, // Deleted
+			},
+			expectedNewCount:     1,
+			expectedMovedCount:   1,
+			expectedUnchanged:    1,
+			expectedDeletedCount: 2,
+			expectedTotalCount:   5,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Make a copy of current to avoid modifying test data
+			currentCopy := make([]core.Technology, len(tt.current))
+			copy(currentCopy, tt.current)
+
+			// Call markChanges only if previous is not nil
+			if tt.previous != nil {
+				markChanges(&currentCopy, tt.previous)
+			}
+
+			// Count technologies by status
+			var newCount, movedCount, unchangedCount, deletedCount int
+			for _, tech := range currentCopy {
+				if tech.IsNew {
+					newCount++
+				} else if tech.IsMoved {
+					movedCount++
+				} else if tech.IsDeleted {
+					deletedCount++
+				} else {
+					unchangedCount++
+				}
+			}
+
+			// Check counts
+			if tt.previous != nil {
+				if newCount != tt.expectedNewCount {
+					t.Errorf("Expected %d new technologies, got %d", tt.expectedNewCount, newCount)
+				}
+				if movedCount != tt.expectedMovedCount {
+					t.Errorf("Expected %d moved technologies, got %d", tt.expectedMovedCount, movedCount)
+				}
+				if unchangedCount != tt.expectedUnchanged {
+					t.Errorf("Expected %d unchanged technologies, got %d", tt.expectedUnchanged, unchangedCount)
+				}
+				if deletedCount != tt.expectedDeletedCount {
+					t.Errorf("Expected %d deleted technologies, got %d", tt.expectedDeletedCount, deletedCount)
+				}
+			}
+
+			// Check total count
+			if len(currentCopy) != tt.expectedTotalCount {
+				t.Errorf("Expected total %d technologies, got %d", tt.expectedTotalCount, len(currentCopy))
+			}
+
+			// Check specific technology if specified
+			if tt.checkSpecificTech != "" {
+				found := false
+				for _, tech := range currentCopy {
+					if tech.Name == tt.checkSpecificTech {
+						found = true
+						if tech.IsNew != tt.expectedIsNew {
+							t.Errorf("Technology %s: expected IsNew=%v, got %v", tt.checkSpecificTech, tt.expectedIsNew, tech.IsNew)
+						}
+						if tech.IsMoved != tt.expectedIsMoved {
+							t.Errorf("Technology %s: expected IsMoved=%v, got %v", tt.checkSpecificTech, tt.expectedIsMoved, tech.IsMoved)
+						}
+						if tech.IsDeleted != tt.expectedIsDeleted {
+							t.Errorf("Technology %s: expected IsDeleted=%v, got %v", tt.checkSpecificTech, tt.expectedIsDeleted, tech.IsDeleted)
+						}
+						if tt.expectedPreviousRing != "" && tech.PreviousRing != tt.expectedPreviousRing {
+							t.Errorf("Technology %s: expected PreviousRing=%s, got %s", tt.checkSpecificTech, tt.expectedPreviousRing, tech.PreviousRing)
+						}
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Technology %s not found in result", tt.checkSpecificTech)
+				}
+			}
+		})
+	}
+}
+
+func TestMarkChangesDeletedTechnologyPreservesOriginalData(t *testing.T) {
+	// Test that deleted technology preserves all original data
+	current := []core.Technology{
+		{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Go language"},
+	}
+	previous := []core.Technology{
+		{Name: "Go", Ring: "Adopt", Quadrant: "Languages", Description: "Go language"},
+		{Name: "React", Ring: "Trial", Quadrant: "Frameworks", Description: "React framework", Info: "Additional info"},
+	}
+
+	markChanges(&current, previous)
+
+	// Find deleted technology
+	var deletedTech *core.Technology
+	for i, tech := range current {
+		if tech.Name == "React" {
+			deletedTech = &current[i]
+			break
+		}
+	}
+
+	if deletedTech == nil {
+		t.Fatal("Deleted technology 'React' not found in result")
+	}
+
+	// Check that all original data is preserved
+	if deletedTech.Name != "React" {
+		t.Errorf("Expected Name='React', got '%s'", deletedTech.Name)
+	}
+	if deletedTech.Ring != "Trial" {
+		t.Errorf("Expected Ring='Trial', got '%s'", deletedTech.Ring)
+	}
+	if deletedTech.Quadrant != "Frameworks" {
+		t.Errorf("Expected Quadrant='Frameworks', got '%s'", deletedTech.Quadrant)
+	}
+	if deletedTech.Description != "React framework" {
+		t.Errorf("Expected Description='React framework', got '%s'", deletedTech.Description)
+	}
+	if deletedTech.Info != "Additional info" {
+		t.Errorf("Expected Info='Additional info', got '%s'", deletedTech.Info)
+	}
+	if !deletedTech.IsDeleted {
+		t.Error("Expected IsDeleted=true")
+	}
+	if deletedTech.IsNew {
+		t.Error("Expected IsNew=false for deleted technology")
+	}
+	if deletedTech.IsMoved {
+		t.Error("Expected IsMoved=false for deleted technology")
+	}
+}
